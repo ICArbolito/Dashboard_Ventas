@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi Premium</title>
+    <title>Dashboard Gusi Premium - Con Diferencia</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        /* Fondo gris muy sutil para resaltar las tarjetas blancas */
         html, body { 
             height: 100vh; width: 100vw; 
             background: #f4f7f6; 
@@ -20,7 +18,6 @@
             display: flex; align-items: center; justify-content: center;
         }
         
-        /* Contenedor principal con sombra neumórfica suave */
         #wrapper { 
             width: 100vw; height: 56.25vw; 
             max-height: 100vh; max-width: 177.78vh; 
@@ -33,7 +30,6 @@
             padding: 2vh;
         }
         
-        /* Título Premium */
         h1 { 
             text-align: center; 
             margin: 1vh 0 2vh 0;
@@ -44,15 +40,11 @@
             letter-spacing: 1px;
         }
         
-        /* Verde Gusi más vibrante */
         #cedis-label { color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
+        #main-content { display: flex; flex: 1; width: 100%; overflow: hidden; gap: 1.5vw; }
         
-        /* Contenedor del contenido principal */
-        #main-content { display: flex; flex: 1; width: 100%; overflow: hidden; gap: 2vw; }
-        
-        /* Caja de la gráfica (65%) */
         .chart-box { 
-            flex: 0.65; 
+            flex: 0.60; /* Ajustado para dar un poco más de espacio a la tabla */
             position: relative; 
             background: #ffffff;
             border-radius: 15px;
@@ -61,53 +53,46 @@
         }
         #bulletChart { width: 100% !important; height: 100% !important; }
 
-        /* Caja de la tabla (35%) */
         .table-box { 
-            flex: 0.35; 
+            flex: 0.40; 
             overflow: hidden; 
             display: flex; flex-direction: column; 
-            justify-content: flex-start;
             background: #ffffff;
             border-radius: 15px;
             padding: 10px;
             box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
         }
         
-        /* Tabla Estilizada */
-        table { width: 100%; border-collapse: collapse; font-size: 1.7vh; text-align: right; table-layout: fixed; }
-        
-        /* Cabecera de tabla Moderna */
+        table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; table-layout: fixed; }
         th { 
             position: sticky; top: 0; background: #ffffff;
-            padding: 1.5vh 0.5vw; 
+            padding: 1.2vh 0.3vw; 
             color: #7f8c8d; 
             font-weight: 700; 
             text-transform: uppercase; 
             text-align: center; 
-            font-size: 1.4vh; 
-            letter-spacing: 1px;
+            font-size: 1.3vh; 
             border-bottom: 2px solid #edf2f1;
         }
         
-        /* Filas con hover sutil */
-        td { padding: 1.3vh 0.5vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
-        tr:last-child td { border-bottom: none; }
+        td { padding: 1.1vh 0.3vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
         tr:hover td { background-color: #fbfcfc; }
         
-        /* Estilos de columna */
-        td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* Ruta */
-        .td-obj { color: #e74c3c; font-weight: 500; width: 25%; } /* Objetivo */
-        .td-vta { color: #27ae60; font-weight: 900; width: 25%; font-size: 1.8vh; } /* Venta */
-        .td-idl { color: #7f8c8d; font-weight: 400; width: 20%; } /* Ideal */
+        td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 22%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .td-obj { color: #e74c3c; font-weight: 500; width: 20%; }
+        .td-vta { color: #2ecc71; font-weight: 700; width: 20%; }
+        .td-idl { color: #7f8c8d; font-weight: 400; width: 18%; }
         
-        /* Pie de página elegante */
+        /* Colores de la Diferencia */
+        .td-dif { font-weight: 900; width: 20%; font-size: 1.6vh; }
+        .pos { color: #27ae60; } /* Verde para arriba */
+        .neg { color: #c0392b; } /* Rojo para abajo */
+        
         .footer { 
             text-align: center; 
             padding: 1.5vh 0 0.5vh 0; 
             font-size: 1.6vh; 
             color: #bdc3c7; 
-            font-weight: 400; 
-            letter-spacing: 1px; 
             border-top: 1px solid #f0f0f0;
             margin-top: 1vh;
         }
@@ -130,10 +115,10 @@
                             <th>Objetivo</th>
                             <th>Venta</th>
                             <th>Ideal</th>
+                            <th>Dif.</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -142,19 +127,17 @@
     </div>
 
     <script>
-        // TU LINK DE GOOGLE SHEETS (LA PESTAÑA LIMPIA HTML)
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=255221202&single=true&output=csv';
-        
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
-        // Limpieza y formato de números
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
-        function formatCurrency(num) { return '$' + Math.round(num).toLocaleString('en-US'); }
+        function formatCurrency(num) { 
+            const sign = num < 0 ? '-' : (num > 0 ? '+' : '');
+            return sign + '$' + Math.abs(Math.round(num)).toLocaleString('en-US'); 
+        }
 
-        // Configuración Global de Chart.js para un look premium
         Chart.defaults.font.family = "'Roboto', sans-serif";
-        Chart.defaults.color = '#7f8c8d';
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
@@ -168,66 +151,65 @@
 
                 let data = res.data.filter(row => {
                     const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
-                    const hasRuta = row[rKey] && row[rKey].trim() !== '';
-                    return isCedis && hasRuta;
+                    return isCedis && row[rKey]?.trim();
                 });
 
                 document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
 
-                if (!data.length) return;
-
-                // --- TABLA PREMIUM ---
                 const tbody = document.querySelector('#dataTable tbody');
                 let rowsHTML = '';
                 data.forEach(item => {
+                    const vActual = cleanNumber(item[cVta]);
+                    const vIdeal = cleanNumber(item[cIdl]);
+                    const diferencia = vActual - vIdeal;
+                    const claseColor = diferencia >= 0 ? 'pos' : 'neg';
+
                     rowsHTML += `
                         <tr>
                             <td>${item[rKey]}</td>
                             <td class="td-obj">${formatCurrency(cleanNumber(item[cObj]))}</td>
-                            <td class="td-vta">${formatCurrency(cleanNumber(item[cVta]))}</td>
-                            <td class="td-idl">${formatCurrency(cleanNumber(item[cIdl]))}</td>
+                            <td class="td-vta">${formatCurrency(vActual)}</td>
+                            <td class="td-idl">${formatCurrency(vIdeal)}</td>
+                            <td class="td-dif ${claseColor}">${formatCurrency(diferencia)}</td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = rowsHTML;
 
-                // --- GRÁFICA BULLET PREMIUM ---
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
                         datasets: [
                             {
                                 type: 'bar',
-                                label: 'Objetivo Quincena',
+                                label: 'Objetivo',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(231, 76, 60, 0.1)', // Rojo Flat sutil
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
                                 borderColor: '#e74c3c',
                                 borderWidth: 1,
-                                borderRadius: 5, // Bordes redondeados en las barras
+                                borderRadius: 5,
                                 barPercentage: 0.85,
-                                categoryPercentage: 1.0,
                                 order: 3
                             },
                             {
                                 type: 'bar',
-                                label: 'Venta Alcanzada',
+                                label: 'Venta',
                                 data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#2ecc71', // Verde Flat vibrante
+                                backgroundColor: '#2ecc71',
                                 borderRadius: 5,
                                 barPercentage: 0.5,
-                                categoryPercentage: 1.0,
                                 order: 2
                             },
                             {
                                 type: 'line',
-                                label: 'Alcance Ideal',
+                                label: 'Ideal',
                                 data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#34495e', // Gris asfalto
+                                backgroundColor: '#34495e',
                                 borderColor: '#34495e',
                                 showLine: false,
                                 pointStyle: 'line',
                                 rotation: 90,
-                                pointRadius: 18, // Marcador más grande y visible
+                                pointRadius: 18,
                                 pointBorderWidth: 5,
                                 order: 1
                             }
@@ -239,32 +221,12 @@
                         maintainAspectRatio: false,
                         grouped: false,
                         plugins: {
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { color: '#7f8c8d', font: { size: 15, weight: '500' }, padding: 20, usePointStyle: true } 
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(44, 62, 80, 0.9)',
-                                titleFont: { size: 16, weight: '700' },
-                                bodyFont: { size: 14 },
-                                padding: 12,
-                                cornerRadius: 8,
-                                callbacks: { label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.x.toLocaleString()}` }
-                            }
+                            legend: { position: 'bottom', labels: { color: '#7f8c8d', font: { size: 14 } } }
                         },
                         scales: {
-                            x: {
-                                stacked: false,
-                                grid: { color: 'rgba(0,0,0,0.03)' },
-                                ticks: { color: '#95a5a6', font: {size: 12}, callback: v => '$' + v.toLocaleString() }
-                            },
-                            y: {
-                                stacked: false,
-                                grid: { display: false },
-                                ticks: { color: '#2c3e50', font: { weight: '700', size: 15 }, padding: 15 }
-                            }
-                        },
-                        layout: { padding: { right: 10, top: 10 } }
+                            x: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { callback: v => '$' + v.toLocaleString() } },
+                            y: { grid: { display: false }, ticks: { font: { weight: '700', size: 14 } } }
+                        }
                     }
                 });
             }
