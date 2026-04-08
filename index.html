@@ -3,36 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Pro Gusi</title>
+    <title>Bullet Chart Gusi - Full Screen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: #000; color: white; margin: 0; padding: 0; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; overflow: hidden; 
+        /* Reset total para ocupar toda la pantalla */
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
+            background-color: #000;
+            overflow: hidden;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
         }
-        .wrapper {
-            width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh;
-            background: #0a0a0a; padding: 20px; box-sizing: border-box;
-            display: flex; flex-direction: column; border-radius: 10px;
+
+        /* Contenedor que mantiene la proporción 16:9 */
+        #main-container {
+            width: 100vw;
+            height: 56.25vw; 
+            max-height: 100vh;
+            max-width: 177.78vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            background: #050505;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
         }
-        h1 { text-align: center; margin: 0 0 10px 0; font-size: 2.8vw; text-transform: uppercase; }
-        #cedis-label { color: #00e676; }
-        .chart-container { flex-grow: 1; position: relative; }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            padding: 1.5vh 0;
+            font-size: 3.5vh;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 2px solid #333;
+        }
+
+        #cedis-label { color: #00e676; font-weight: bold; }
+
+        .chart-wrapper {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            padding: 10px 25px 5px 10px;
+        }
+
+        #bulletChart { width: 100% !important; height: 100% !important; }
     </style>
 </head>
 <body>
-    <div class="wrapper">
+    <div id="main-container">
         <h1>AVANCE QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
-        <div class="chart-container">
+        <div class="chart-wrapper">
             <canvas id="bulletChart"></canvas>
         </div>
     </div>
 
     <script>
         const public_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
+
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
@@ -42,11 +75,16 @@
         }
 
         Papa.parse(public_url, {
-            download: true, header: true, skipEmptyLines: true,
+            download: true,
+            header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 let data = results.data.filter(row => {
-                    const cediKey = Object.keys(row).find(k => k.trim().toUpperCase() === 'CEDIS');
-                    return filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
+                    const keys = Object.keys(row);
+                    const cediKey = keys.find(k => k.trim().toUpperCase() === 'CEDIS');
+                    const rutaKey = keys.find(k => k.trim().toUpperCase() === 'RUTA');
+                    const match = filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
+                    return match && row[rutaKey] && row[rutaKey].trim() !== '';
                 });
 
                 document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
@@ -56,35 +94,38 @@
                 const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
                 const colIdeal = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL');
 
-                new Chart(document.getElementById('bulletChart'), {
+                const ctx = document.getElementById('bulletChart').getContext('2d');
+                new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: data.map(item => item[colRuta]),
                         datasets: [
                             {
-                                label: 'Venta Actual',
-                                data: data.map(item => cleanNumber(item[colVta])),
-                                backgroundColor: '#00e676',
-                                barPercentage: 0.4, // Más delgada para que parezca el centro del bullet
-                                order: 1
-                            },
-                            {
                                 label: 'Ideal a la fecha',
                                 data: data.map(item => cleanNumber(item[colIdeal])),
-                                type: 'scatter', // Usamos puntos para simular el marcador de "donde debería ir"
+                                type: 'scatter',
                                 backgroundColor: '#fff',
                                 borderColor: '#fff',
                                 pointStyle: 'rectRot',
-                                pointRadius: 8,
+                                pointRadius: 10,
                                 order: 0
+                            },
+                            {
+                                label: 'Venta Actual',
+                                data: data.map(item => cleanNumber(item[colVta])),
+                                backgroundColor: '#00e676',
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.8,
+                                order: 1
                             },
                             {
                                 label: 'Objetivo Total',
                                 data: data.map(item => cleanNumber(item[colObj])),
                                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                 borderColor: '#ff5252',
-                                borderWidth: 1,
-                                barPercentage: 0.8, // Más ancha, sirve de "contenedor"
+                                borderWidth: 2,
+                                barPercentage: 0.85,
+                                categoryPercentage: 0.8,
                                 order: 2
                             }
                         ]
@@ -94,19 +135,27 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14 } } }
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#fff', font: { size: 16 }, padding: 20 }
+                            }
                         },
                         scales: {
-                            x: { 
-                                stacked: false, // Importante: False para que se encimen manualmente con el orden
-                                grid: { color: '#333' },
-                                ticks: { color: '#aaa', callback: (v) => '$' + v.toLocaleString() }
+                            x: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { 
+                                    color: '#aaa',
+                                    font: { size: 12 },
+                                    callback: v => '$' + v.toLocaleString() 
+                                }
                             },
-                            y: { 
+                            y: {
                                 grid: { display: false },
-                                ticks: { color: '#fff', font: { size: 14, weight: 'bold' } }
+                                ticks: { color: '#fff', font: { size: 16, weight: 'bold' } }
                             }
-                        }
+                        },
+                        layout: { padding: { right: 20 } }
                     }
                 });
             }
