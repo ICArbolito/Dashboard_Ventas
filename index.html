@@ -3,25 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Objetivos - Bullet Definitivo</title>
+    <title>Dashboard Gusi - Light Mode</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100vh; width: 100vw; background: #000; overflow: hidden; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
-        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #080808; display: flex; flex-direction: column; position: relative;}
-        h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 1px solid #222; text-transform: uppercase; }
-        #cedis-label { color: #00e676; }
-        .chart-box { flex: 1; position: relative; padding: 15px 30px 15px 15px; }
+        /* Fondo principal blanco y letras oscuras */
+        html, body { height: 100vh; width: 100vw; background: #ffffff; overflow: hidden; color: #333; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
+        
+        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05);}
+        
+        /* Título adaptado al fondo claro */
+        h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; color: #222; }
+        
+        /* Verde un poco más oscuro para que lea bien en blanco */
+        #cedis-label { color: #00c853; }
+        
+        .chart-box { flex: 1; position: relative; padding: 15px 30px 5px 15px; }
         #bulletChart { width: 100% !important; height: 100% !important; }
+        
+        /* Estilo del pie de página */
+        .footer { text-align: center; padding: 0.5vh 0 1.5vh 0; font-size: 1.8vh; color: #888; font-weight: 500; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <h1>AVANCE QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
+        
         <div class="chart-box">
             <canvas id="bulletChart"></canvas>
         </div>
+        
+        <div class="footer">(Source: SistemaCP | Made by Inteligencia Comercial)</div>
     </div>
 
     <script>
@@ -29,13 +42,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
-        // Limpia números con formato de moneda
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
-                // Buscadores flexibles de columnas (así no importa si le pones "VENTA_AYER" o "VENTA_ALCANZADA")
                 const headers = Object.keys(res.data[0] || {});
                 const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
                 const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
@@ -43,7 +54,6 @@
                 const cVta = headers.find(k => k.toUpperCase().includes('VENTA'));
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
-                // Filtrar datos
                 let data = res.data.filter(row => {
                     const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
                     const hasRuta = row[rKey] && row[rKey].trim() !== '';
@@ -62,10 +72,10 @@
                                 type: 'bar',
                                 label: 'Objetivo Quincena',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(255, 82, 82, 0.15)',
+                                backgroundColor: 'rgba(255, 82, 82, 0.15)', // Fondo rojo clarito
                                 borderColor: '#ff5252',
                                 borderWidth: 2,
-                                barPercentage: 0.9, // La más gruesa (Contenedor)
+                                barPercentage: 0.9,
                                 categoryPercentage: 1.0,
                                 order: 3
                             },
@@ -73,8 +83,8 @@
                                 type: 'bar',
                                 label: 'Venta Alcanzada',
                                 data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#00e676', // Verde brillante
-                                barPercentage: 0.45, // Más delgada para ir adentro
+                                backgroundColor: '#00e676',
+                                barPercentage: 0.45,
                                 categoryPercentage: 1.0,
                                 order: 2
                             },
@@ -82,11 +92,12 @@
                                 type: 'line',
                                 label: 'Alcance Ideal',
                                 data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#fff',
-                                borderColor: '#fff',
-                                showLine: false, // No unimos los puntos con líneas
-                                pointStyle: 'line', // Forma de línea
-                                rotation: 90, // Girada para que se vea como marcador vertical
+                                // Marcador en gris oscuro/negro para que se vea en fondo blanco
+                                backgroundColor: '#222',
+                                borderColor: '#222',
+                                showLine: false,
+                                pointStyle: 'line',
+                                rotation: 90,
                                 pointRadius: 15,
                                 pointBorderWidth: 4,
                                 order: 1
@@ -94,23 +105,29 @@
                         ]
                     },
                     options: {
-                        indexAxis: 'y', // Gráfica horizontal
+                        indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        grouped: false, // LA SOLUCIÓN: Obliga a encimar absolutamente todo en la misma línea
+                        grouped: false,
                         plugins: {
-                            legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14 }, padding: 20 } }
+                            legend: { 
+                                position: 'bottom', 
+                                // Letras de la leyenda en oscuro
+                                labels: { color: '#444', font: { size: 14, weight: 'bold' }, padding: 15 } 
+                            }
                         },
                         scales: {
                             x: {
                                 stacked: false,
-                                grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { color: '#aaa', callback: v => '$' + v.toLocaleString() }
+                                // Cuadrícula adaptada a modo claro
+                                grid: { color: 'rgba(0,0,0,0.08)' },
+                                ticks: { color: '#666', font: {weight: '500'}, callback: v => '$' + v.toLocaleString() }
                             },
                             y: {
                                 stacked: false,
                                 grid: { display: false },
-                                ticks: { color: '#fff', font: { weight: 'bold', size: 14 } }
+                                // Nombres de las rutas en oscuro
+                                ticks: { color: '#222', font: { weight: 'bold', size: 14 } }
                             }
                         }
                     }
