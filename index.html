@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Bullet Real</title>
+    <title>Dashboard Gusi - Bullet Definitivo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100vh; width: 100vw; background: #000; overflow: hidden; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; }
-        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #080808; display: flex; flex-direction: column; }
-        h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 1px solid #222; text-transform: uppercase; color: #fff; }
+        html, body { height: 100vh; width: 100vw; background: #000; overflow: hidden; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
+        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #080808; display: flex; flex-direction: column; position: relative;}
+        h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 1px solid #222; text-transform: uppercase; }
         #cedis-label { color: #00e676; }
-        .chart-box { flex: 1; position: relative; padding: 15px 30px 5px 10px; }
+        .chart-box { flex: 1; position: relative; padding: 15px 30px 15px 15px; }
         #bulletChart { width: 100% !important; height: 100% !important; }
     </style>
 </head>
@@ -29,79 +29,86 @@
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
+        // Limpia números con formato de moneda
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
+                // Buscadores flexibles de columnas (así no importa si le pones "VENTA_AYER" o "VENTA_ALCANZADA")
+                const headers = Object.keys(res.data[0] || {});
+                const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
+                const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
+                const cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO'));
+                const cVta = headers.find(k => k.toUpperCase().includes('VENTA'));
+                const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
+
+                // Filtrar datos
                 let data = res.data.filter(row => {
-                    const cKey = Object.keys(row).find(k => k.trim().toUpperCase() === 'CEDIS');
-                    const rKey = Object.keys(row).find(k => k.trim().toUpperCase() === 'RUTA');
-                    return (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim();
+                    const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
+                    const hasRuta = row[rKey] && row[rKey].trim() !== '';
+                    return isCedis && hasRuta;
                 });
 
                 document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
 
                 if (!data.length) return;
 
-                const cRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
-                const cObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
-                const cVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
-                const cIdl = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL');
-
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
-                        labels: data.map(item => item[cRuta]),
+                        labels: data.map(item => item[rKey]),
                         datasets: [
                             {
-                                type: 'scatter',
-                                label: 'Ideal a la fecha',
-                                data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#fff',
-                                pointStyle: 'rect', // Cambiado a una barra blanca recta
-                                rotation: 90, // Girada para que sea vertical
-                                pointRadius: 10,
-                                order: 0
-                            },
-                            {
                                 type: 'bar',
-                                label: 'Venta Actual',
-                                data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#00e676',
-                                barPercentage: 0.35, // Delgada
-                                categoryPercentage: 0.9,
-                                grouped: false, // LA VERDADERA MAGIA: Quita el agrupamiento aquí
-                                order: 1
-                            },
-                            {
-                                type: 'bar',
-                                label: 'Objetivo Total',
+                                label: 'Objetivo Quincena',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(255, 82, 82, 0.1)',
+                                backgroundColor: 'rgba(255, 82, 82, 0.15)',
                                 borderColor: '#ff5252',
                                 borderWidth: 2,
-                                barPercentage: 0.85, // Gruesa (Contenedor)
-                                categoryPercentage: 0.9,
-                                grouped: false, // Y AQUÍ TAMBIÉN
+                                barPercentage: 0.9, // La más gruesa (Contenedor)
+                                categoryPercentage: 1.0,
+                                order: 3
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Venta Alcanzada',
+                                data: data.map(item => cleanNumber(item[cVta])),
+                                backgroundColor: '#00e676', // Verde brillante
+                                barPercentage: 0.45, // Más delgada para ir adentro
+                                categoryPercentage: 1.0,
                                 order: 2
+                            },
+                            {
+                                type: 'line',
+                                label: 'Alcance Ideal',
+                                data: data.map(item => cleanNumber(item[cIdl])),
+                                backgroundColor: '#fff',
+                                borderColor: '#fff',
+                                showLine: false, // No unimos los puntos con líneas
+                                pointStyle: 'line', // Forma de línea
+                                rotation: 90, // Girada para que se vea como marcador vertical
+                                pointRadius: 15,
+                                pointBorderWidth: 4,
+                                order: 1
                             }
                         ]
                     },
                     options: {
-                        indexAxis: 'y',
+                        indexAxis: 'y', // Gráfica horizontal
                         responsive: true,
                         maintainAspectRatio: false,
+                        grouped: false, // LA SOLUCIÓN: Obliga a encimar absolutamente todo en la misma línea
                         plugins: {
-                            legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14 } } }
+                            legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14 }, padding: 20 } }
                         },
                         scales: {
                             x: {
-                                stacked: false, // Que los valores no se sumen
+                                stacked: false,
                                 grid: { color: 'rgba(255,255,255,0.05)' },
                                 ticks: { color: '#aaa', callback: v => '$' + v.toLocaleString() }
                             },
                             y: {
-                                stacked: true, // FORZA A QUE COMPARTAN LA MISMA LÍNEA HORIZONTAL EXACTA
+                                stacked: false,
                                 grid: { display: false },
                                 ticks: { color: '#fff', font: { weight: 'bold', size: 14 } }
                             }
