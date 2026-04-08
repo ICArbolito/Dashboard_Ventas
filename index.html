@@ -3,25 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Base Plana</title>
+    <title>Dashboard Gusi - Data Exacta</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* Fondo principal blanco y letras oscuras */
         html, body { height: 100vh; width: 100vw; background: #ffffff; overflow: hidden; color: #333; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
         
         #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05);}
         
+        /* Título adaptado al fondo claro */
         h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; color: #222; }
         #cedis-label { color: #00c853; }
         
+        /* Contenedor que divide la pantalla en dos columnas */
         #main-content { display: flex; flex: 1; width: 100%; padding: 10px 20px 0 10px; overflow: hidden; }
         
+        /* La gráfica toma el 65% del espacio */
         .chart-box { flex: 0.65; position: relative; padding-right: 20px; }
         #bulletChart { width: 100% !important; height: 100% !important; }
 
+        /* La tabla toma el 35% del espacio */
         .table-box { flex: 0.35; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
         
+        /* Diseño de la tabla "Bonita" y minimalista */
         table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-radius: 8px; overflow: hidden; }
         th, td { padding: 1.2vh 1vw; border-bottom: 1px solid #f0f0f0; }
         th { background: #f8f9fa; color: #666; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.4vh; letter-spacing: 0.5px; }
@@ -33,6 +39,7 @@
         .td-vta { color: #00c853; font-weight: 700; }
         .td-idl { color: #222; font-weight: 500; }
         
+        /* Estilo del pie de página */
         .footer { text-align: center; padding: 0.5vh 0 1.5vh 0; font-size: 1.8vh; color: #888; font-weight: 500; letter-spacing: 0.5px; }
     </style>
 </head>
@@ -56,7 +63,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -65,8 +72,8 @@
     </div>
 
     <script>
-        // Tu link a la base de datos
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
+        // LINK ACTUALIZADO A LA NUEVA PESTAÑA "HTML"
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=255221202&single=true&output=csv';
         
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
@@ -77,15 +84,15 @@
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
-                // Busca las columnas en el CSV
+                // Buscadores flexibles de columnas
                 const headers = Object.keys(res.data[0] || {});
                 const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
                 const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
                 const cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO'));
-                const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); // Busca directo la de Venta Alcanzada
+                const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); 
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
-                // Aquí ocurre la magia de la segmentación automática
+                // Filtrar datos por CEDIS desde la URL
                 let data = res.data.filter(row => {
                     const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
                     const hasRuta = row[rKey] && row[rKey].trim() !== '';
@@ -96,6 +103,7 @@
 
                 if (!data.length) return;
 
+                // --- MAGIA DE LA TABLA ---
                 const tbody = document.querySelector('#dataTable tbody');
                 let rowsHTML = '';
                 
@@ -116,6 +124,7 @@
                 });
                 tbody.innerHTML = rowsHTML;
 
+                // --- MAGIA DE LA GRÁFICA BULLET ---
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
@@ -124,10 +133,10 @@
                                 type: 'bar',
                                 label: 'Objetivo Quincena',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(255, 82, 82, 0.15)',
+                                backgroundColor: 'rgba(255, 82, 82, 0.15)', // Fondo rojo clarito
                                 borderColor: '#ff5252',
                                 borderWidth: 2,
-                                barPercentage: 0.9,
+                                barPercentage: 0.9, // Contenedor ancho
                                 categoryPercentage: 1.0,
                                 order: 3
                             },
@@ -135,8 +144,8 @@
                                 type: 'bar',
                                 label: 'Venta Alcanzada',
                                 data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#00e676',
-                                barPercentage: 0.45,
+                                backgroundColor: '#00e676', // Verde
+                                barPercentage: 0.45, // Barra central delgada
                                 categoryPercentage: 1.0,
                                 order: 2
                             },
@@ -144,10 +153,10 @@
                                 type: 'line',
                                 label: 'Alcance Ideal',
                                 data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#222',
+                                backgroundColor: '#222', // Marcador oscuro para fondo blanco
                                 borderColor: '#222',
                                 showLine: false,
-                                pointStyle: 'line',
+                                pointStyle: 'line', // Línea vertical
                                 rotation: 90,
                                 pointRadius: 15,
                                 pointBorderWidth: 4,
@@ -159,7 +168,7 @@
                         indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        grouped: false,
+                        grouped: false, // CLAVE PARA QUE SE ENCIMEN
                         plugins: {
                             legend: { 
                                 position: 'bottom', 
