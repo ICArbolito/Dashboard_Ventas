@@ -2,45 +2,37 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="120">
-    <title>Dashboard Gusi - Light Mode + Tabla</title>
+    <meta http-equiv="refresh" content="300">
+    <title>Dashboard Gusi - Base Plana</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        /* Fondo principal blanco y letras oscuras */
         html, body { height: 100vh; width: 100vw; background: #ffffff; overflow: hidden; color: #333; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
         
         #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05);}
         
-        /* Título adaptado al fondo claro */
         h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; color: #222; }
         #cedis-label { color: #00c853; }
         
-        /* Contenedor que divide la pantalla en dos columnas */
         #main-content { display: flex; flex: 1; width: 100%; padding: 10px 20px 0 10px; overflow: hidden; }
         
-        /* La gráfica toma el 65% del espacio */
         .chart-box { flex: 0.65; position: relative; padding-right: 20px; }
         #bulletChart { width: 100% !important; height: 100% !important; }
 
-        /* La tabla toma el 35% del espacio */
         .table-box { flex: 0.35; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
         
-        /* Diseño de la tabla "Bonita" y minimalista */
         table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-radius: 8px; overflow: hidden; }
         th, td { padding: 1.2vh 1vw; border-bottom: 1px solid #f0f0f0; }
         th { background: #f8f9fa; color: #666; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.4vh; letter-spacing: 0.5px; }
         tr:last-child td { border-bottom: none; }
-        tr:hover { background: #fafafa; } /* Efecto hover sutil */
+        tr:hover { background: #fafafa; }
         
-        /* Colores específicos para las columnas de la tabla */
-        td:first-child { text-align: left; font-weight: bold; color: #333; } /* Ruta */
-        .td-obj { color: #ff5252; font-weight: 500; } /* Objetivo */
-        .td-vta { color: #00c853; font-weight: 700; } /* Venta */
-        .td-idl { color: #222; font-weight: 500; } /* Ideal */
+        td:first-child { text-align: left; font-weight: bold; color: #333; }
+        .td-obj { color: #ff5252; font-weight: 500; }
+        .td-vta { color: #00c853; font-weight: 700; }
+        .td-idl { color: #222; font-weight: 500; }
         
-        /* Estilo del pie de página */
         .footer { text-align: center; padding: 0.5vh 0 1.5vh 0; font-size: 1.8vh; color: #888; font-weight: 500; letter-spacing: 0.5px; }
     </style>
 </head>
@@ -64,7 +56,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -73,27 +65,27 @@
     </div>
 
     <script>
+        // Tu link a la base de datos
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
+        
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
-        
-        // Función para darle formato chulo a los números de la tabla (ej. $123,456) sin decimales
-        function formatCurrency(num) { 
-            return '$' + Math.round(num).toLocaleString('en-US'); 
-        }
+        function formatCurrency(num) { return '$' + Math.round(num).toLocaleString('en-US'); }
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
+                // Busca las columnas en el CSV
                 const headers = Object.keys(res.data[0] || {});
                 const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
                 const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
                 const cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO'));
-                const cVta = headers.find(k => k.toUpperCase().includes('VENTA'));
+                const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); // Busca directo la de Venta Alcanzada
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
+                // Aquí ocurre la magia de la segmentación automática
                 let data = res.data.filter(row => {
                     const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
                     const hasRuta = row[rKey] && row[rKey].trim() !== '';
@@ -104,7 +96,6 @@
 
                 if (!data.length) return;
 
-                // --- MAGIA DE LA TABLA ---
                 const tbody = document.querySelector('#dataTable tbody');
                 let rowsHTML = '';
                 
@@ -124,9 +115,7 @@
                     `;
                 });
                 tbody.innerHTML = rowsHTML;
-                // -------------------------
 
-                // --- MAGIA DE LA GRÁFICA ---
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
