@@ -1,26 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Ventas Gusi</title>
+    <title>Bullet Chart Ventas Gusi</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
-        .container { width: 95%; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; }
-        #error-msg { color: #ff5252; font-weight: bold; margin-top: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #000; color: white; margin: 0; padding: 10px; overflow: hidden; }
+        .container { width: 98vw; height: 95vh; margin: auto; background: #111; padding: 15px; border-radius: 10px; }
+        h1 { text-align: center; color: #fff; font-size: 24px; margin-bottom: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AVANCE DE VENTAS POR RUTA</h1>
-        <div id="error-msg"></div>
-        <canvas id="ventasChart" height="120"></canvas>
+        <h1>Avance de Objetivos por Ruta (Bullet Graph)</h1>
+        <canvas id="bulletChart"></canvas>
     </div>
 
     <script>
-        // PEGA TU LINK AQUÍ ABAJO (Asegúrate que termine en output=csv)
         const public_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
 
         function cleanNumber(val) {
@@ -33,49 +32,61 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                console.log("Datos recibidos:", results.data); // Esto es para debug
-                const data = results.data;
+                const data = results.data.filter(row => row.RUTA && row.RUTA !== 'RUTA');
                 
-                if (data.length === 0) {
-                    document.getElementById('error-msg').innerText = "Error: El archivo CSV está vacío o el link es incorrecto.";
-                    return;
-                }
+                const labels = data.map(item => item.RUTA);
+                const objetivos = data.map(item => cleanNumber(item.OBJETIVO_QUINCENA));
+                const ventas = data.map(item => cleanNumber(item.VENTA_ALCANZADA));
 
-                // Buscador inteligente de columnas (por si tienen espacios o mayúsculas)
-                const colRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
-                const colObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
-                const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
-
-                if (!colRuta || !colObj || !colVta) {
-                    document.getElementById('error-msg').innerText = "Error: No encontré las columnas RUTA, OBJETIVO_QUINCENA o VENTA_ALCANZADA.";
-                    return;
-                }
-
-                const labels = data.map(item => item[colRuta]);
-                const objetivos = data.map(item => cleanNumber(item[colObj]));
-                const ventas = data.map(item => cleanNumber(item[colVta]));
-
-                new Chart(document.getElementById('ventasChart'), {
+                new Chart(document.getElementById('bulletChart'), {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [
-                            { label: 'Objetivo', data: objetivos, backgroundColor: '#ff5252' },
-                            { label: 'Venta Actual', data: ventas, backgroundColor: '#00e676' }
+                            {
+                                label: 'Venta Alcanzada',
+                                data: ventas,
+                                backgroundColor: '#00e676',
+                                order: 1,
+                                barPercentage: 0.5, // Barra más delgada (la de adentro)
+                                categoryPercentage: 0.8
+                            },
+                            {
+                                label: 'Objetivo Quincena',
+                                data: objetivos,
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)', // Barra de fondo traslúcida
+                                borderColor: '#ff5252',
+                                borderWidth: 1,
+                                order: 2,
+                                barPercentage: 0.9, // Barra más ancha (la de afuera)
+                                categoryPercentage: 0.8
+                            }
                         ]
                     },
                     options: {
+                        indexAxis: 'x', // Cámbialo a 'y' si quieres que las barras sean horizontales
                         responsive: true,
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: '#333' }, ticks: { color: '#fff' } },
-                            x: { ticks: { color: '#fff', font: { size: 10 } } }
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#fff', font: { size: 14 } } }
                         },
-                        plugins: { legend: { labels: { color: '#fff' } } }
+                        scales: {
+                            x: { 
+                                stacked: true, // Esto hace que se encimen
+                                ticks: { color: '#fff', font: { size: 10 }, autoSkip: false, maxRotation: 90 }
+                            },
+                            y: {
+                                stacked: false, // El eje Y no se sumará, se mantendrá el valor real
+                                beginAtZero: true,
+                                grid: { color: '#333' },
+                                ticks: { 
+                                    color: '#aaa',
+                                    callback: (value) => '$' + value.toLocaleString()
+                                }
+                            }
+                        }
                     }
                 });
-            },
-            error: function(err) {
-                document.getElementById('error-msg').innerText = "Error de conexión con Google Sheets.";
             }
         });
     </script>
