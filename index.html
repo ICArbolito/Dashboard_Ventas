@@ -7,73 +7,75 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; margin: 0; padding: 20px; }
-        .container { width: 95%; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { text-align: center; color: #00e676; text-transform: uppercase; letter-spacing: 2px; }
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        .container { width: 95%; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; }
+        #error-msg { color: #ff5252; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Avance de Ventas por Ruta</h1>
-        <canvas id="ventasChart" height="100"></canvas>
+        <h1>AVANCE DE VENTAS POR RUTA</h1>
+        <div id="error-msg"></div>
+        <canvas id="ventasChart" height="120"></canvas>
     </div>
 
     <script>
-        // PEGA TU LINK AQUÍ ABAJO
-        const public_url = 'TU_LINK_AQUI_EL_QUE_TERMINA_EN_CSV';
+        // PEGA TU LINK AQUÍ ABAJO (Asegúrate que termine en output=csv)
+        const public_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
 
         function cleanNumber(val) {
             if (!val) return 0;
-            // Quita signos de pesos, comas y espacios para que Chart.js no se apendeje
-            return parseFloat(val.replace(/[$, ]/g, '')) || 0;
+            return parseFloat(val.toString().replace(/[$, ]/g, '')) || 0;
         }
 
         Papa.parse(public_url, {
             download: true,
             header: true,
+            skipEmptyLines: true,
             complete: function(results) {
-                const data = results.data.filter(row => row.RUTA); // Filtra filas vacías
+                console.log("Datos recibidos:", results.data); // Esto es para debug
+                const data = results.data;
                 
-                const labels = data.map(item => item.RUTA);
-                const objetivos = data.map(item => cleanNumber(item.OBJETIVO_QUINCENA));
-                const ventas = data.map(item => cleanNumber(item.VENTA_ALCANZADA));
+                if (data.length === 0) {
+                    document.getElementById('error-msg').innerText = "Error: El archivo CSV está vacío o el link es incorrecto.";
+                    return;
+                }
+
+                // Buscador inteligente de columnas (por si tienen espacios o mayúsculas)
+                const colRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
+                const colObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
+                const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
+
+                if (!colRuta || !colObj || !colVta) {
+                    document.getElementById('error-msg').innerText = "Error: No encontré las columnas RUTA, OBJETIVO_QUINCENA o VENTA_ALCANZADA.";
+                    return;
+                }
+
+                const labels = data.map(item => item[colRuta]);
+                const objetivos = data.map(item => cleanNumber(item[colObj]));
+                const ventas = data.map(item => cleanNumber(item[colVta]));
 
                 new Chart(document.getElementById('ventasChart'), {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [
-                            { 
-                                label: 'Objetivo Quincena', 
-                                data: objetivos, 
-                                backgroundColor: '#ff5252',
-                                borderRadius: 5
-                            },
-                            { 
-                                label: 'Venta Alcanzada', 
-                                data: ventas, 
-                                backgroundColor: '#00e676',
-                                borderRadius: 5
-                            }
+                            { label: 'Objetivo', data: objetivos, backgroundColor: '#ff5252' },
+                            { label: 'Venta Actual', data: ventas, backgroundColor: '#00e676' }
                         ]
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: { labels: { color: 'white', font: { size: 14 } } }
-                        },
                         scales: {
-                            y: { 
-                                beginAtZero: true, 
-                                grid: { color: '#333' },
-                                ticks: { color: '#aaa', callback: function(value) { return '$' + value.toLocaleString(); } }
-                            },
-                            x: { 
-                                ticks: { color: '#aaa', autoSkip: false, maxRotation: 90, minRotation: 45 } 
-                            }
-                        }
+                            y: { beginAtZero: true, grid: { color: '#333' }, ticks: { color: '#fff' } },
+                            x: { ticks: { color: '#fff', font: { size: 10 } } }
+                        },
+                        plugins: { legend: { labels: { color: '#fff' } } }
                     }
                 });
+            },
+            error: function(err) {
+                document.getElementById('error-msg').innerText = "Error de conexión con Google Sheets.";
             }
         });
     </script>
