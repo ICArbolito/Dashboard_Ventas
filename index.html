@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Light Mode</title>
+    <title>Dashboard Gusi - Light Mode + Tabla</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
@@ -15,12 +15,30 @@
         
         /* Título adaptado al fondo claro */
         h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; color: #222; }
-        
-        /* Verde un poco más oscuro para que lea bien en blanco */
         #cedis-label { color: #00c853; }
         
-        .chart-box { flex: 1; position: relative; padding: 15px 30px 5px 15px; }
+        /* Contenedor que divide la pantalla en dos columnas */
+        #main-content { display: flex; flex: 1; width: 100%; padding: 10px 20px 0 10px; overflow: hidden; }
+        
+        /* La gráfica toma el 65% del espacio */
+        .chart-box { flex: 0.65; position: relative; padding-right: 20px; }
         #bulletChart { width: 100% !important; height: 100% !important; }
+
+        /* La tabla toma el 35% del espacio */
+        .table-box { flex: 0.35; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        
+        /* Diseño de la tabla "Bonita" y minimalista */
+        table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 1.2vh 1vw; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; color: #666; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.4vh; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #fafafa; } /* Efecto hover sutil */
+        
+        /* Colores específicos para las columnas de la tabla */
+        td:first-child { text-align: left; font-weight: bold; color: #333; } /* Ruta */
+        .td-obj { color: #ff5252; font-weight: 500; } /* Objetivo */
+        .td-vta { color: #00c853; font-weight: 700; } /* Venta */
+        .td-idl { color: #222; font-weight: 500; } /* Ideal */
         
         /* Estilo del pie de página */
         .footer { text-align: center; padding: 0.5vh 0 1.5vh 0; font-size: 1.8vh; color: #888; font-weight: 500; letter-spacing: 0.5px; }
@@ -30,8 +48,25 @@
     <div id="wrapper">
         <h1>AVANCE OBJETIVO QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
         
-        <div class="chart-box">
-            <canvas id="bulletChart"></canvas>
+        <div id="main-content">
+            <div class="chart-box">
+                <canvas id="bulletChart"></canvas>
+            </div>
+            
+            <div class="table-box">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Ruta</th>
+                            <th>Objetivo</th>
+                            <th>Venta</th>
+                            <th>Ideal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
         
         <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
@@ -43,6 +78,11 @@
         const filtradoCedis = urlParams.get('cedis');
 
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
+        
+        // Función para darle formato chulo a los números de la tabla (ej. $123,456) sin decimales
+        function formatCurrency(num) { 
+            return '$' + Math.round(num).toLocaleString('en-US'); 
+        }
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
@@ -64,6 +104,29 @@
 
                 if (!data.length) return;
 
+                // --- MAGIA DE LA TABLA ---
+                const tbody = document.querySelector('#dataTable tbody');
+                let rowsHTML = '';
+                
+                data.forEach(item => {
+                    const ruta = item[rKey];
+                    const obj = formatCurrency(cleanNumber(item[cObj]));
+                    const vta = formatCurrency(cleanNumber(item[cVta]));
+                    const idl = formatCurrency(cleanNumber(item[cIdl]));
+                    
+                    rowsHTML += `
+                        <tr>
+                            <td>${ruta}</td>
+                            <td class="td-obj">${obj}</td>
+                            <td class="td-vta">${vta}</td>
+                            <td class="td-idl">${idl}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = rowsHTML;
+                // -------------------------
+
+                // --- MAGIA DE LA GRÁFICA ---
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
@@ -72,7 +135,7 @@
                                 type: 'bar',
                                 label: 'Objetivo Quincena',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(255, 82, 82, 0.15)', // Fondo rojo clarito
+                                backgroundColor: 'rgba(255, 82, 82, 0.15)',
                                 borderColor: '#ff5252',
                                 borderWidth: 2,
                                 barPercentage: 0.9,
@@ -92,7 +155,6 @@
                                 type: 'line',
                                 label: 'Alcance Ideal',
                                 data: data.map(item => cleanNumber(item[cIdl])),
-                                // Marcador en gris oscuro/negro para que se vea en fondo blanco
                                 backgroundColor: '#222',
                                 borderColor: '#222',
                                 showLine: false,
@@ -112,21 +174,18 @@
                         plugins: {
                             legend: { 
                                 position: 'bottom', 
-                                // Letras de la leyenda en oscuro
                                 labels: { color: '#444', font: { size: 14, weight: 'bold' }, padding: 15 } 
                             }
                         },
                         scales: {
                             x: {
                                 stacked: false,
-                                // Cuadrícula adaptada a modo claro
                                 grid: { color: 'rgba(0,0,0,0.08)' },
                                 ticks: { color: '#666', font: {weight: '500'}, callback: v => '$' + v.toLocaleString() }
                             },
                             y: {
                                 stacked: false,
                                 grid: { display: false },
-                                // Nombres de las rutas en oscuro
                                 ticks: { color: '#222', font: { weight: 'bold', size: 14 } }
                             }
                         }
