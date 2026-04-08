@@ -3,189 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Full Bullet</title>
+    <title>Bullet Graph Gusi Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        /* Reset total para Full Screen */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            height: 100vh; width: 100vw;
-            background-color: #000;
-            overflow: hidden;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        /* Contenedor forzado 16:9 */
-        #page-wrapper {
-            width: 100vw;
-            height: 56.25vw; /* Ratio 16:9 */
-            max-height: 100vh;
-            max-width: 177.78vh; /* Ratio 16:9 */
-            background-color: #050505;
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            padding-top: 1vh;
-        }
-
-        h1 {
-            text-align: center;
-            margin: 0;
-            padding: 1vh 0;
-            font-size: 3.5vh;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(255,255,255,0.03);
-            border-bottom: 2px solid #222;
-        }
-
-        #cedis-label { color: #00e676; font-weight: bold; }
-
-        .chart-container {
-            flex: 1;
-            width: 100%;
-            position: relative;
-            padding: 10px 30px 5px 10px;
-        }
-
-        #status {
-            color: #ff5252; font-size: 2vh; text-align: center;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        }
+        html, body { height: 100vh; width: 100vw; background: #000; overflow: hidden; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; }
+        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #080808; display: flex; flex-direction: column; }
+        h1 { text-align: center; padding: 1.5vh; font-size: 3vh; border-bottom: 1px solid #333; text-transform: uppercase; }
+        .chart-box { flex: 1; position: relative; padding: 10px 40px 10px 10px; }
+        #bulletChart { width: 100% !important; height: 100% !important; }
     </style>
 </head>
 <body>
-    <div id="page-wrapper">
-        <h1>AVANCE QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
-        <div id="status">Conectando...</div>
-        <div class="chart-container">
+    <div id="wrapper">
+        <h1>Avance Quincenal - <span id="cedis-label" style="color:#00e676">...</span></h1>
+        <div class="chart-box">
             <canvas id="bulletChart"></canvas>
         </div>
     </div>
 
     <script>
-        const public_url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
-
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
         const urlParams = new URLSearchParams(window.location.search);
-        const filtradoCedis = urlParams.get('cedis');
+        const cedis = urlParams.get('cedis');
 
-        function cleanNumber(val) {
-            if (!val) return 0;
-            return parseFloat(val.toString().replace(/[$, ]/g, '')) || 0;
-        }
+        function num(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
 
-        Papa.parse(public_url, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            error: function(err) {
-                document.getElementById('status').innerText = "ERROR: No hay conexión con la hoja.";
-            },
-            complete: function(results) {
-                let rawData = results.data;
-                document.getElementById('status').innerText = "Filtrando datos...";
-
-                let data = rawData.filter(row => {
-                    const keys = Object.keys(row);
-                    const cediKey = keys.find(k => k.trim().toUpperCase() === 'CEDIS');
-                    const rutaKey = keys.find(k => k.trim().toUpperCase() === 'RUTA');
-                    
-                    const matchCedis = filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
-                    const hasRuta = row[rutaKey] && row[rutaKey].trim() !== '';
-
-                    return matchCedis && hasRuta;
+        Papa.parse(csvUrl, {
+            download: true, header: true, skipEmptyLines: true,
+            complete: function(res) {
+                let data = res.data.filter(r => {
+                    const cKey = Object.keys(r).find(k => k.trim().toUpperCase() === 'CEDIS');
+                    return cedis ? r[cKey]?.trim().toUpperCase() === cedis.toUpperCase() : true;
                 });
 
-                document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
+                document.getElementById('cedis-label').innerText = cedis?.toUpperCase() || "TODOS";
 
-                if (data.length === 0) {
-                    document.getElementById('status').innerText = "ERROR: Sin datos para CEDIS " + filtradoCedis;
-                    return;
-                }
-
-                document.getElementById('status').style.display = 'none';
-
-                const colRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
-                const colObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
-                const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
-                const colIdeal = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL');
+                const labels = data.map(d => d[Object.keys(d).find(k => k.trim().toUpperCase() === 'RUTA')]);
+                const vta = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA')]));
+                const obj = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA')]));
+                const idl = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL')]));
 
                 new Chart(document.getElementById('bulletChart'), {
+                    type: 'bar',
                     data: {
-                        labels: data.map(item => item[colRuta]),
+                        labels: labels,
                         datasets: [
-                            // CAPA DE FONDO: Objetivo Total (La barra "contenedor" más ancha)
                             {
-                                type: 'bar',
-                                label: 'Objetivo Total',
-                                data: data.map(item => cleanNumber(item[colObj])),
-                                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                                borderColor: '#ff5252',
-                                borderWidth: 1.5,
-                                order: 2,
-                                barPercentage: 0.85, // Barra ancha
-                                categoryPercentage: 0.9
-                            },
-                            // CAPA MEDIA: Venta Actual (Barra verde dentro del contenedor)
-                            {
-                                type: 'bar',
-                                label: 'Venta Actual',
-                                data: data.map(item => cleanNumber(item[colVta])),
-                                backgroundColor: '#00e676',
-                                order: 1, // Se dibuja ENCIMA del objetivo
-                                barPercentage: 0.5, // Barra más delgada, justo al centro
-                                categoryPercentage: 0.9
-                            },
-                            // CAPA SUPERIOR: Ideal (Marcador flotante)
-                            {
+                                label: 'Ideal',
+                                data: idl,
                                 type: 'scatter',
-                                label: 'Ideal a la fecha',
-                                data: data.map(item => cleanNumber(item[colIdeal])),
                                 backgroundColor: '#fff',
+                                pointStyle: 'line', // Línea vertical
+                                rotation: 90,
+                                pointRadius: 15,
+                                borderWidth: 3,
                                 borderColor: '#fff',
-                                pointStyle: 'rectRot',
-                                pointRadius: 10,
-                                order: 0 // Hasta arriba
+                                order: 0
+                            },
+                            {
+                                label: 'Venta Actual',
+                                data: vta,
+                                backgroundColor: '#00e676',
+                                barPercentage: 0.4, // Delgada
+                                categoryPercentage: 1,
+                                order: 1
+                            },
+                            {
+                                label: 'Objetivo Total',
+                                data: obj,
+                                backgroundColor: 'rgba(255, 82, 82, 0.1)',
+                                borderColor: '#ff5252',
+                                borderWidth: 1,
+                                barPercentage: 0.8, // Gruesa (contenedor)
+                                categoryPercentage: 1,
+                                order: 2
                             }
                         ]
                     },
                     options: {
-                        indexAxis: 'y', // Gráfica horizontal
+                        indexAxis: 'y',
                         responsive: true,
-                        maintainAspectRatio: false, // Ocupa todo el contenedor 16:9
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { color: '#fff', font: { size: 16 }, boxWidth: 20, padding: 20 }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.x.toLocaleString()}`
-                                }
+                        maintainAspectRatio: false,
+                        // ESTA ES LA CLAVE PARA QUE SE ENCIMEN
+                        datasets: {
+                            bar: {
+                                grouping: false 
                             }
                         },
                         scales: {
-                            x: {
-                                stacked: false, // CRÍTICO: False para que se encimen manualmente con 'order'
-                                beginAtZero: true,
-                                grid: { color: 'rgba(255,255,255,0.08)' },
-                                ticks: {
-                                    color: '#aaa',
-                                    font: { size: 12 },
-                                    callback: (v) => '$' + v.toLocaleString()
-                                }
+                            x: { 
+                                stacked: false, 
+                                beginAtZero: true, 
+                                grid: { color: '#222' },
+                                ticks: { color: '#888', callback: v => '$' + v.toLocaleString() }
                             },
-                            y: {
-                                grid: { display: false },
-                                ticks: {
-                                    color: '#fff',
-                                    font: { size: 16, weight: 'bold' }
-                                }
+                            y: { 
+                                stacked: false,
+                                ticks: { color: '#fff', font: { weight: 'bold', size: 14 } }
                             }
                         },
-                        layout: { padding: { right: 20, bottom: 0 } }
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#fff' } }
+                        }
                     }
                 });
             }
