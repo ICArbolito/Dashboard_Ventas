@@ -3,126 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi Premium - Con Diferencia</title>
+    <title>Dashboard Gusi Premium - Totalizado</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { 
-            height: 100vh; width: 100vw; 
-            background: #f4f7f6; 
-            overflow: hidden; 
-            color: #1a1a1a; 
-            font-family: 'Roboto', sans-serif; 
-            display: flex; align-items: center; justify-content: center;
+            height: 100vh; width: 100vw; background: #f4f7f6; overflow: hidden; 
+            color: #1a1a1a; font-family: 'Roboto', sans-serif; display: flex; align-items: center; justify-content: center;
         }
-        
         #wrapper { 
-            width: 100vw; height: 56.25vw; 
-            max-height: 100vh; max-width: 177.78vh; 
-            background: #ffffff; 
-            display: flex; flex-direction: column; 
-            position: relative; 
-            border-radius: 20px;
-            box-shadow: 20px 20px 60px #d9dbda, -20px -20px 60px #ffffff;
-            overflow: hidden;
-            padding: 2vh;
+            width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
+            background: #ffffff; display: flex; flex-direction: column; border-radius: 20px;
+            box-shadow: 20px 20px 60px #d9dbda, -20px -20px 60px #ffffff; overflow: hidden; padding: 2vh;
         }
-        
-        h1 { 
-            text-align: center; 
-            margin: 1vh 0 2vh 0;
-            font-size: 3.8vh; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            color: #2c3e50; 
-            letter-spacing: 1px;
-        }
-        
+        h1 { text-align: center; margin: 1vh 0 2vh 0; font-size: 3.8vh; font-weight: 900; text-transform: uppercase; color: #2c3e50; letter-spacing: 1px;}
         #cedis-label { color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
         #main-content { display: flex; flex: 1; width: 100%; overflow: hidden; gap: 1.5vw; }
-        
-        .chart-box { 
-            flex: 0.60; /* Ajustado para dar un poco más de espacio a la tabla */
-            position: relative; 
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
-        }
-        #bulletChart { width: 100% !important; height: 100% !important; }
-
-        .table-box { 
-            flex: 0.40; 
-            overflow: hidden; 
-            display: flex; flex-direction: column; 
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 10px;
-            box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
-        }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; table-layout: fixed; }
-        th { 
-            position: sticky; top: 0; background: #ffffff;
-            padding: 1.2vh 0.3vw; 
-            color: #7f8c8d; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            text-align: center; 
-            font-size: 1.3vh; 
-            border-bottom: 2px solid #edf2f1;
-        }
-        
-        td { padding: 1.1vh 0.3vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
+        .chart-box { flex: 0.60; position: relative; background: #ffffff; border-radius: 15px; padding: 15px; box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff; }
+        .table-box { flex: 0.40; overflow: hidden; display: flex; flex-direction: column; background: #ffffff; border-radius: 15px; padding: 10px; box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff; }
+        table { width: 100%; border-collapse: collapse; font-size: 1.55vh; text-align: right; table-layout: fixed; }
+        th { position: sticky; top: 0; background: #ffffff; padding: 1.2vh 0.3vw; color: #7f8c8d; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.3vh; border-bottom: 2px solid #edf2f1; z-index: 10; }
+        td { padding: 1vh 0.3vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
         tr:hover td { background-color: #fbfcfc; }
-        
         td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 22%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .td-obj { color: #e74c3c; font-weight: 500; width: 20%; }
+        .td-obj { color: #e74c3c; width: 20%; }
         .td-vta { color: #2ecc71; font-weight: 700; width: 20%; }
-        .td-idl { color: #7f8c8d; font-weight: 400; width: 18%; }
-        
-        /* Colores de la Diferencia */
-        .td-dif { font-weight: 900; width: 20%; font-size: 1.6vh; }
-        .pos { color: #27ae60; } /* Verde para arriba */
-        .neg { color: #c0392b; } /* Rojo para abajo */
-        
-        .footer { 
-            text-align: center; 
-            padding: 1.5vh 0 0.5vh 0; 
-            font-size: 1.6vh; 
-            color: #bdc3c7; 
-            border-top: 1px solid #f0f0f0;
-            margin-top: 1vh;
-        }
+        .td-idl { color: #7f8c8d; width: 18%; }
+        .td-dif { font-weight: 900; width: 20%; }
+        .pos { color: #27ae60; } .neg { color: #c0392b; }
+        .tr-total { background: #f8f9fa; }
+        .tr-total td { border-top: 2px solid #2c3e50; font-weight: 900 !important; font-size: 1.6vh; color: #2c3e50 !important; }
+        .footer { text-align: center; padding: 1.5vh 0 0.5vh 0; font-size: 1.6vh; color: #bdc3c7; border-top: 1px solid #f0f0f0; margin-top: 1vh; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <h1>AVANCE OBJETIVO QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
-        
         <div id="main-content">
-            <div class="chart-box">
-                <canvas id="bulletChart"></canvas>
-            </div>
-            
+            <div class="chart-box"><canvas id="bulletChart"></canvas></div>
             <div class="table-box">
                 <table id="dataTable">
                     <thead>
-                        <tr>
-                            <th style="text-align: left;">Ruta</th>
-                            <th>Objetivo</th>
-                            <th>Venta</th>
-                            <th>Ideal</th>
-                            <th>Dif.</th>
-                        </tr>
+                        <tr><th style="text-align: left;">Ruta</th><th>Objetivo</th><th>Venta</th><th>Ideal</th><th>Dif.</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
-        
         <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
     </div>
 
@@ -132,12 +61,15 @@
         const filtradoCedis = urlParams.get('cedis');
 
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
-        function formatCurrency(num) { 
-            const sign = num < 0 ? '-' : (num > 0 ? '+' : '');
-            return sign + '$' + Math.abs(Math.round(num)).toLocaleString('en-US'); 
+        
+        // Formato moneda normal
+        function fCurrency(num) { return '$' + Math.round(num).toLocaleString('en-US'); }
+        
+        // Formato con signo exclusivo para Diferencia
+        function fDiff(num) {
+            const sign = num > 0 ? '+' : (num < 0 ? '-' : '');
+            return sign + '$' + Math.abs(Math.round(num)).toLocaleString('en-US');
         }
-
-        Chart.defaults.font.family = "'Roboto', sans-serif";
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
@@ -150,79 +82,52 @@
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
                 let data = res.data.filter(row => {
-                    const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
-                    return isCedis && row[rKey]?.trim();
+                    return (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim();
                 });
 
                 document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
 
                 const tbody = document.querySelector('#dataTable tbody');
                 let rowsHTML = '';
-                data.forEach(item => {
-                    const vActual = cleanNumber(item[cVta]);
-                    const vIdeal = cleanNumber(item[cIdl]);
-                    const diferencia = vActual - vIdeal;
-                    const claseColor = diferencia >= 0 ? 'pos' : 'neg';
+                let tObj = 0, tVta = 0, tIdl = 0;
 
-                    rowsHTML += `
-                        <tr>
-                            <td>${item[rKey]}</td>
-                            <td class="td-obj">${formatCurrency(cleanNumber(item[cObj]))}</td>
-                            <td class="td-vta">${formatCurrency(vActual)}</td>
-                            <td class="td-idl">${formatCurrency(vIdeal)}</td>
-                            <td class="td-dif ${claseColor}">${formatCurrency(diferencia)}</td>
-                        </tr>
-                    `;
+                data.forEach(item => {
+                    const obj = cleanNumber(item[cObj]), vta = cleanNumber(item[cVta]), idl = cleanNumber(item[cIdl]);
+                    const dif = vta - idl;
+                    tObj += obj; tVta += vta; tIdl += idl;
+
+                    rowsHTML += `<tr>
+                        <td>${item[rKey]}</td>
+                        <td class="td-obj">${fCurrency(obj)}</td>
+                        <td class="td-vta">${fCurrency(vta)}</td>
+                        <td class="td-idl">${fCurrency(idl)}</td>
+                        <td class="td-dif ${dif >= 0 ? 'pos' : 'neg'}">${fDiff(dif)}</td>
+                    </tr>`;
                 });
+
+                const tDif = tVta - tIdl;
+                rowsHTML += `<tr class="tr-total">
+                    <td>TOTAL CEDIS</td>
+                    <td>${fCurrency(tObj)}</td>
+                    <td>${fCurrency(tVta)}</td>
+                    <td>${fCurrency(tIdl)}</td>
+                    <td class="${tDif >= 0 ? 'pos' : 'neg'}">${fDiff(tDif)}</td>
+                </tr>`;
+                
                 tbody.innerHTML = rowsHTML;
 
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
                         datasets: [
-                            {
-                                type: 'bar',
-                                label: 'Objetivo',
-                                data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                                borderColor: '#e74c3c',
-                                borderWidth: 1,
-                                borderRadius: 5,
-                                barPercentage: 0.85,
-                                order: 3
-                            },
-                            {
-                                type: 'bar',
-                                label: 'Venta',
-                                data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#2ecc71',
-                                borderRadius: 5,
-                                barPercentage: 0.5,
-                                order: 2
-                            },
-                            {
-                                type: 'line',
-                                label: 'Ideal',
-                                data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#34495e',
-                                borderColor: '#34495e',
-                                showLine: false,
-                                pointStyle: 'line',
-                                rotation: 90,
-                                pointRadius: 18,
-                                pointBorderWidth: 5,
-                                order: 1
-                            }
+                            { type: 'bar', label: 'Objetivo', data: data.map(item => cleanNumber(item[cObj])), backgroundColor: 'rgba(231, 76, 60, 0.1)', borderColor: '#e74c3c', borderWidth: 1, borderRadius: 5, barPercentage: 0.85, order: 3 },
+                            { type: 'bar', label: 'Venta', data: data.map(item => cleanNumber(item[cVta])), backgroundColor: '#2ecc71', borderRadius: 5, barPercentage: 0.5, order: 2 },
+                            { type: 'line', label: 'Ideal', data: data.map(item => cleanNumber(item[cIdl])), backgroundColor: '#34495e', borderColor: '#34495e', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 18, pointBorderWidth: 5, order: 1 }
                         ]
                     },
                     options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        grouped: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#7f8c8d', font: { size: 14 } } }
-                        },
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, grouped: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#7f8c8d', font: { size: 14 } } } },
                         scales: {
                             x: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { callback: v => '$' + v.toLocaleString() } },
                             y: { grid: { display: false }, ticks: { font: { weight: '700', size: 14 } } }
