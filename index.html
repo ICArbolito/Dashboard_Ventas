@@ -3,62 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Bullet Chart Gusi - Full Screen</title>
+    <title>Dashboard Gusi - Full Bullet</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        /* Reset total para ocupar toda la pantalla */
-        * { box-sizing: border-box; }
+        /* Reset total para Full Screen */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
-            margin: 0; padding: 0;
             height: 100vh; width: 100vw;
             background-color: #000;
             overflow: hidden;
             color: white;
             font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* Contenedor que mantiene la proporción 16:9 */
-        #main-container {
+        /* Contenedor forzado 16:9 */
+        #page-wrapper {
             width: 100vw;
-            height: 56.25vw; 
+            height: 56.25vw; /* Ratio 16:9 */
             max-height: 100vh;
-            max-width: 177.78vh;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-            background: #050505;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            max-width: 177.78vh; /* Ratio 16:9 */
+            background-color: #050505;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            padding-top: 1vh;
         }
 
         h1 {
             text-align: center;
             margin: 0;
-            padding: 1.5vh 0;
+            padding: 1vh 0;
             font-size: 3.5vh;
             text-transform: uppercase;
-            background: rgba(255,255,255,0.05);
-            border-bottom: 2px solid #333;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 2px solid #222;
         }
 
         #cedis-label { color: #00e676; font-weight: bold; }
 
-        .chart-wrapper {
+        .chart-container {
             flex: 1;
             width: 100%;
             position: relative;
-            padding: 10px 25px 5px 10px;
+            padding: 10px 30px 5px 10px;
         }
 
-        #bulletChart { width: 100% !important; height: 100% !important; }
+        #status {
+            color: #ff5252; font-size: 2vh; text-align: center;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
-    <div id="main-container">
+    <div id="page-wrapper">
         <h1>AVANCE QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
-        <div class="chart-wrapper">
+        <div id="status">Conectando...</div>
+        <div class="chart-container">
             <canvas id="bulletChart"></canvas>
         </div>
     </div>
@@ -78,84 +80,112 @@
             download: true,
             header: true,
             skipEmptyLines: true,
+            error: function(err) {
+                document.getElementById('status').innerText = "ERROR: No hay conexión con la hoja.";
+            },
             complete: function(results) {
-                let data = results.data.filter(row => {
+                let rawData = results.data;
+                document.getElementById('status').innerText = "Filtrando datos...";
+
+                let data = rawData.filter(row => {
                     const keys = Object.keys(row);
                     const cediKey = keys.find(k => k.trim().toUpperCase() === 'CEDIS');
                     const rutaKey = keys.find(k => k.trim().toUpperCase() === 'RUTA');
-                    const match = filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
-                    return match && row[rutaKey] && row[rutaKey].trim() !== '';
+                    
+                    const matchCedis = filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
+                    const hasRuta = row[rutaKey] && row[rutaKey].trim() !== '';
+
+                    return matchCedis && hasRuta;
                 });
 
                 document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
+
+                if (data.length === 0) {
+                    document.getElementById('status').innerText = "ERROR: Sin datos para CEDIS " + filtradoCedis;
+                    return;
+                }
+
+                document.getElementById('status').style.display = 'none';
 
                 const colRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
                 const colObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
                 const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
                 const colIdeal = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL');
 
-                const ctx = document.getElementById('bulletChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
+                new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[colRuta]),
                         datasets: [
+                            // CAPA DE FONDO: Objetivo Total (La barra "contenedor" más ancha)
                             {
+                                type: 'bar',
+                                label: 'Objetivo Total',
+                                data: data.map(item => cleanNumber(item[colObj])),
+                                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                                borderColor: '#ff5252',
+                                borderWidth: 1.5,
+                                order: 2,
+                                barPercentage: 0.85, // Barra ancha
+                                categoryPercentage: 0.9
+                            },
+                            // CAPA MEDIA: Venta Actual (Barra verde dentro del contenedor)
+                            {
+                                type: 'bar',
+                                label: 'Venta Actual',
+                                data: data.map(item => cleanNumber(item[colVta])),
+                                backgroundColor: '#00e676',
+                                order: 1, // Se dibuja ENCIMA del objetivo
+                                barPercentage: 0.5, // Barra más delgada, justo al centro
+                                categoryPercentage: 0.9
+                            },
+                            // CAPA SUPERIOR: Ideal (Marcador flotante)
+                            {
+                                type: 'scatter',
                                 label: 'Ideal a la fecha',
                                 data: data.map(item => cleanNumber(item[colIdeal])),
-                                type: 'scatter',
                                 backgroundColor: '#fff',
                                 borderColor: '#fff',
                                 pointStyle: 'rectRot',
                                 pointRadius: 10,
-                                order: 0
-                            },
-                            {
-                                label: 'Venta Actual',
-                                data: data.map(item => cleanNumber(item[colVta])),
-                                backgroundColor: '#00e676',
-                                barPercentage: 0.5,
-                                categoryPercentage: 0.8,
-                                order: 1
-                            },
-                            {
-                                label: 'Objetivo Total',
-                                data: data.map(item => cleanNumber(item[colObj])),
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: '#ff5252',
-                                borderWidth: 2,
-                                barPercentage: 0.85,
-                                categoryPercentage: 0.8,
-                                order: 2
+                                order: 0 // Hasta arriba
                             }
                         ]
                     },
                     options: {
-                        indexAxis: 'y',
+                        indexAxis: 'y', // Gráfica horizontal
                         responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: false, // Ocupa todo el contenedor 16:9
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: { color: '#fff', font: { size: 16 }, padding: 20 }
+                                labels: { color: '#fff', font: { size: 16 }, boxWidth: 20, padding: 20 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.x.toLocaleString()}`
+                                }
                             }
                         },
                         scales: {
                             x: {
+                                stacked: false, // CRÍTICO: False para que se encimen manualmente con 'order'
                                 beginAtZero: true,
-                                grid: { color: 'rgba(255,255,255,0.1)' },
-                                ticks: { 
+                                grid: { color: 'rgba(255,255,255,0.08)' },
+                                ticks: {
                                     color: '#aaa',
                                     font: { size: 12 },
-                                    callback: v => '$' + v.toLocaleString() 
+                                    callback: (v) => '$' + v.toLocaleString()
                                 }
                             },
                             y: {
                                 grid: { display: false },
-                                ticks: { color: '#fff', font: { size: 16, weight: 'bold' } }
+                                ticks: {
+                                    color: '#fff',
+                                    font: { size: 16, weight: 'bold' }
+                                }
                             }
                         },
-                        layout: { padding: { right: 20 } }
+                        layout: { padding: { right: 20, bottom: 0 } }
                     }
                 });
             }
