@@ -3,44 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Data Exacta</title>
+    <title>Dashboard Gusi Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        /* Fondo principal blanco y letras oscuras */
-        html, body { height: 100vh; width: 100vw; background: #ffffff; overflow: hidden; color: #333; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; align-items: center; justify-content: center;}
         
-        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #ffffff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05);}
+        /* Fondo gris muy sutil para resaltar las tarjetas blancas */
+        html, body { 
+            height: 100vh; width: 100vw; 
+            background: #f4f7f6; 
+            overflow: hidden; 
+            color: #1a1a1a; 
+            font-family: 'Roboto', sans-serif; 
+            display: flex; align-items: center; justify-content: center;
+        }
         
-        /* Título adaptado al fondo claro */
-        h1 { text-align: center; padding: 1.5vh; font-size: 3.5vh; border-bottom: 2px solid #f0f0f0; text-transform: uppercase; color: #222; }
-        #cedis-label { color: #00c853; }
+        /* Contenedor principal con sombra neumórfica suave */
+        #wrapper { 
+            width: 100vw; height: 56.25vw; 
+            max-height: 100vh; max-width: 177.78vh; 
+            background: #ffffff; 
+            display: flex; flex-direction: column; 
+            position: relative; 
+            border-radius: 20px;
+            box-shadow: 20px 20px 60px #d9dbda, -20px -20px 60px #ffffff;
+            overflow: hidden;
+            padding: 2vh;
+        }
         
-        /* Contenedor que divide la pantalla en dos columnas */
-        #main-content { display: flex; flex: 1; width: 100%; padding: 10px 20px 0 10px; overflow: hidden; }
+        /* Título Premium */
+        h1 { 
+            text-align: center; 
+            margin: 1vh 0 2vh 0;
+            font-size: 3.8vh; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            color: #2c3e50; 
+            letter-spacing: 1px;
+        }
         
-        /* La gráfica toma el 65% del espacio */
-        .chart-box { flex: 0.65; position: relative; padding-right: 20px; }
+        /* Verde Gusi más vibrante */
+        #cedis-label { color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
+        
+        /* Contenedor del contenido principal */
+        #main-content { display: flex; flex: 1; width: 100%; overflow: hidden; gap: 2vw; }
+        
+        /* Caja de la gráfica (65%) */
+        .chart-box { 
+            flex: 0.65; 
+            position: relative; 
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
+        }
         #bulletChart { width: 100% !important; height: 100% !important; }
 
-        /* La tabla toma el 35% del espacio */
-        .table-box { flex: 0.35; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        /* Caja de la tabla (35%) */
+        .table-box { 
+            flex: 0.35; 
+            overflow: hidden; 
+            display: flex; flex-direction: column; 
+            justify-content: flex-start;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
+        }
         
-        /* Diseño de la tabla "Bonita" y minimalista */
-        table { width: 100%; border-collapse: collapse; font-size: 1.6vh; text-align: right; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-radius: 8px; overflow: hidden; }
-        th, td { padding: 1.2vh 1vw; border-bottom: 1px solid #f0f0f0; }
-        th { background: #f8f9fa; color: #666; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.4vh; letter-spacing: 0.5px; }
+        /* Tabla Estilizada */
+        table { width: 100%; border-collapse: collapse; font-size: 1.7vh; text-align: right; table-layout: fixed; }
+        
+        /* Cabecera de tabla Moderna */
+        th { 
+            position: sticky; top: 0; background: #ffffff;
+            padding: 1.5vh 0.5vw; 
+            color: #7f8c8d; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            text-align: center; 
+            font-size: 1.4vh; 
+            letter-spacing: 1px;
+            border-bottom: 2px solid #edf2f1;
+        }
+        
+        /* Filas con hover sutil */
+        td { padding: 1.3vh 0.5vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
         tr:last-child td { border-bottom: none; }
-        tr:hover { background: #fafafa; }
+        tr:hover td { background-color: #fbfcfc; }
         
-        td:first-child { text-align: left; font-weight: bold; color: #333; }
-        .td-obj { color: #ff5252; font-weight: 500; }
-        .td-vta { color: #00c853; font-weight: 700; }
-        .td-idl { color: #222; font-weight: 500; }
+        /* Estilos de columna */
+        td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* Ruta */
+        .td-obj { color: #e74c3c; font-weight: 500; width: 25%; } /* Objetivo */
+        .td-vta { color: #27ae60; font-weight: 900; width: 25%; font-size: 1.8vh; } /* Venta */
+        .td-idl { color: #7f8c8d; font-weight: 400; width: 20%; } /* Ideal */
         
-        /* Estilo del pie de página */
-        .footer { text-align: center; padding: 0.5vh 0 1.5vh 0; font-size: 1.8vh; color: #888; font-weight: 500; letter-spacing: 0.5px; }
+        /* Pie de página elegante */
+        .footer { 
+            text-align: center; 
+            padding: 1.5vh 0 0.5vh 0; 
+            font-size: 1.6vh; 
+            color: #bdc3c7; 
+            font-weight: 400; 
+            letter-spacing: 1px; 
+            border-top: 1px solid #f0f0f0;
+            margin-top: 1vh;
+        }
     </style>
 </head>
 <body>
@@ -72,19 +142,23 @@
     </div>
 
     <script>
-        // LINK ACTUALIZADO A LA NUEVA PESTAÑA "HTML"
+        // TU LINK DE GOOGLE SHEETS (LA PESTAÑA LIMPIA HTML)
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=255221202&single=true&output=csv';
         
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
+        // Limpieza y formato de números
         function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
         function formatCurrency(num) { return '$' + Math.round(num).toLocaleString('en-US'); }
+
+        // Configuración Global de Chart.js para un look premium
+        Chart.defaults.font.family = "'Roboto', sans-serif";
+        Chart.defaults.color = '#7f8c8d';
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
-                // Buscadores flexibles de columnas
                 const headers = Object.keys(res.data[0] || {});
                 const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
                 const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
@@ -92,7 +166,6 @@
                 const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); 
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
-                // Filtrar datos por CEDIS desde la URL
                 let data = res.data.filter(row => {
                     const isCedis = filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
                     const hasRuta = row[rKey] && row[rKey].trim() !== '';
@@ -103,28 +176,22 @@
 
                 if (!data.length) return;
 
-                // --- MAGIA DE LA TABLA ---
+                // --- TABLA PREMIUM ---
                 const tbody = document.querySelector('#dataTable tbody');
                 let rowsHTML = '';
-                
                 data.forEach(item => {
-                    const ruta = item[rKey];
-                    const obj = formatCurrency(cleanNumber(item[cObj]));
-                    const vta = formatCurrency(cleanNumber(item[cVta]));
-                    const idl = formatCurrency(cleanNumber(item[cIdl]));
-                    
                     rowsHTML += `
                         <tr>
-                            <td>${ruta}</td>
-                            <td class="td-obj">${obj}</td>
-                            <td class="td-vta">${vta}</td>
-                            <td class="td-idl">${idl}</td>
+                            <td>${item[rKey]}</td>
+                            <td class="td-obj">${formatCurrency(cleanNumber(item[cObj]))}</td>
+                            <td class="td-vta">${formatCurrency(cleanNumber(item[cVta]))}</td>
+                            <td class="td-idl">${formatCurrency(cleanNumber(item[cIdl]))}</td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = rowsHTML;
 
-                // --- MAGIA DE LA GRÁFICA BULLET ---
+                // --- GRÁFICA BULLET PREMIUM ---
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
@@ -133,10 +200,11 @@
                                 type: 'bar',
                                 label: 'Objetivo Quincena',
                                 data: data.map(item => cleanNumber(item[cObj])),
-                                backgroundColor: 'rgba(255, 82, 82, 0.15)', // Fondo rojo clarito
-                                borderColor: '#ff5252',
-                                borderWidth: 2,
-                                barPercentage: 0.9, // Contenedor ancho
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)', // Rojo Flat sutil
+                                borderColor: '#e74c3c',
+                                borderWidth: 1,
+                                borderRadius: 5, // Bordes redondeados en las barras
+                                barPercentage: 0.85,
                                 categoryPercentage: 1.0,
                                 order: 3
                             },
@@ -144,8 +212,9 @@
                                 type: 'bar',
                                 label: 'Venta Alcanzada',
                                 data: data.map(item => cleanNumber(item[cVta])),
-                                backgroundColor: '#00e676', // Verde
-                                barPercentage: 0.45, // Barra central delgada
+                                backgroundColor: '#2ecc71', // Verde Flat vibrante
+                                borderRadius: 5,
+                                barPercentage: 0.5,
                                 categoryPercentage: 1.0,
                                 order: 2
                             },
@@ -153,13 +222,13 @@
                                 type: 'line',
                                 label: 'Alcance Ideal',
                                 data: data.map(item => cleanNumber(item[cIdl])),
-                                backgroundColor: '#222', // Marcador oscuro para fondo blanco
-                                borderColor: '#222',
+                                backgroundColor: '#34495e', // Gris asfalto
+                                borderColor: '#34495e',
                                 showLine: false,
-                                pointStyle: 'line', // Línea vertical
+                                pointStyle: 'line',
                                 rotation: 90,
-                                pointRadius: 15,
-                                pointBorderWidth: 4,
+                                pointRadius: 18, // Marcador más grande y visible
+                                pointBorderWidth: 5,
                                 order: 1
                             }
                         ]
@@ -168,25 +237,34 @@
                         indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        grouped: false, // CLAVE PARA QUE SE ENCIMEN
+                        grouped: false,
                         plugins: {
                             legend: { 
                                 position: 'bottom', 
-                                labels: { color: '#444', font: { size: 14, weight: 'bold' }, padding: 15 } 
+                                labels: { color: '#7f8c8d', font: { size: 15, weight: '500' }, padding: 20, usePointStyle: true } 
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                                titleFont: { size: 16, weight: '700' },
+                                bodyFont: { size: 14 },
+                                padding: 12,
+                                cornerRadius: 8,
+                                callbacks: { label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.x.toLocaleString()}` }
                             }
                         },
                         scales: {
                             x: {
                                 stacked: false,
-                                grid: { color: 'rgba(0,0,0,0.08)' },
-                                ticks: { color: '#666', font: {weight: '500'}, callback: v => '$' + v.toLocaleString() }
+                                grid: { color: 'rgba(0,0,0,0.03)' },
+                                ticks: { color: '#95a5a6', font: {size: 12}, callback: v => '$' + v.toLocaleString() }
                             },
                             y: {
                                 stacked: false,
                                 grid: { display: false },
-                                ticks: { color: '#222', font: { weight: 'bold', size: 14 } }
+                                ticks: { color: '#2c3e50', font: { weight: '700', size: 15 }, padding: 15 }
                             }
-                        }
+                        },
+                        layout: { padding: { right: 10, top: 10 } }
                     }
                 });
             }
