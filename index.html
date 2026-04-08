@@ -1,170 +1,49 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi Premium - Full KPI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { 
-            height: 100vh; width: 100vw; background: #f4f7f6; overflow: hidden; 
-            color: #1a1a1a; font-family: 'Roboto', sans-serif; display: flex; align-items: center; justify-content: center;
-        }
-        #wrapper { 
-            width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
-            background: #ffffff; display: flex; flex-direction: column; border-radius: 20px;
-            box-shadow: 20px 20px 60px #d9dbda, -20px -20px 60px #ffffff; overflow: hidden; padding: 2vh;
-        }
-        h1 { text-align: center; margin: 1vh 0 2vh 0; font-size: 3.8vh; font-weight: 900; text-transform: uppercase; color: #2c3e50; letter-spacing: 1px;}
-        #cedis-label { color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.3); }
-        
-        #main-content { display: flex; flex: 1; width: 100%; overflow: hidden; gap: 1.5vw; }
-        
-        /* Gráfica principal (Izquierda) */
-        .left-panel { flex: 0.60; display: flex; flex-direction: column; gap: 1vh; }
-        .chart-box { flex: 1; position: relative; background: #ffffff; border-radius: 15px; padding: 15px; box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff; }
-        
-        /* Panel Derecho (Tabla + KPI Circular) */
-        .right-panel { flex: 0.40; display: flex; flex-direction: column; gap: 1.5vh; overflow: hidden; }
-        .table-box { flex: 0.70; overflow: hidden; background: #ffffff; border-radius: 15px; padding: 10px; box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff; }
-        
-        /* Contenedor del KPI Circular (Abajo a la derecha) */
-        .kpi-box { 
-            flex: 0.30; display: flex; align-items: center; justify-content: space-around;
-            background: #ffffff; border-radius: 15px; padding: 10px;
-            box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
-        }
-        .kpi-text { text-align: center; }
-        .kpi-value { font-size: 4.5vh; font-weight: 900; color: #2c3e50; line-height: 1; }
-        .kpi-label { font-size: 1.4vh; color: #7f8c8d; text-transform: uppercase; font-weight: 700; margin-top: 5px; }
+<style>
+    /* ... (mantener estilos anteriores) ... */
 
-        table { width: 100%; border-collapse: collapse; font-size: 1.5vh; text-align: right; table-layout: fixed; }
-        th { position: sticky; top: 0; background: #ffffff; padding: 1vh 0.3vw; color: #7f8c8d; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 1.2vh; border-bottom: 2px solid #edf2f1; z-index: 10; }
-        td { padding: 0.8vh 0.3vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
-        td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 22%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .td-obj { color: #e74c3c; width: 20%; }
-        .td-vta { color: #2ecc71; font-weight: 700; width: 20%; }
-        .td-idl { color: #7f8c8d; width: 18%; }
-        .pos { color: #27ae60; } .neg { color: #c0392b; }
-        .tr-total { background: #f8f9fa; }
-        .tr-total td { border-top: 2px solid #2c3e50; font-weight: 900 !important; font-size: 1.6vh; color: #2c3e50 !important; }
-        
-        .footer { text-align: center; padding: 1.5vh 0 0.5vh 0; font-size: 1.6vh; color: #bdc3c7; border-top: 1px solid #f0f0f0; margin-top: 1vh; }
-    </style>
-</head>
-<body>
-    <div id="wrapper">
-        <h1>AVANCE OBJETIVO QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
-        <div id="main-content">
-            <div class="left-panel">
-                <div class="chart-box"><canvas id="bulletChart"></canvas></div>
-            </div>
-            <div class="right-panel">
-                <div class="table-box">
-                    <table id="dataTable">
-                        <thead>
-                            <tr><th style="text-align: left;">Ruta</th><th>Objetivo</th><th>Venta</th><th>Ideal</th><th>Dif.</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="kpi-box">
-                    <div class="kpi-text">
-                        <div class="kpi-value" id="percent-val">0%</div>
-                        <div class="kpi-label">Avance Total CEDIS</div>
-                    </div>
-                    <div style="height: 100%; width: 40%; position: relative;">
-                        <canvas id="kpiChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
-    </div>
+    /* AJUSTE PARA RUTAS LARGAS */
+    .table-box { 
+        flex: 0.70; 
+        overflow-y: auto; /* Habilita scroll si es necesario */
+        background: #ffffff; 
+        border-radius: 15px; 
+        padding: 10px; 
+        box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
+        scrollbar-width: none; /* Oculta scrollbar en Firefox */
+    }
+    
+    .table-box::-webkit-scrollbar { display: none; } /* Oculta scrollbar en Chrome/Safari */
 
-    <script>
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=255221202&single=true&output=csv';
-        const urlParams = new URLSearchParams(window.location.search);
-        const filtradoCedis = urlParams.get('cedis');
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        /* Reducimos un poco el tamaño base para que quepan más */
+        font-size: 1.45vh; 
+        text-align: right; 
+        table-layout: fixed; 
+    }
 
-        function cleanNumber(val) { return parseFloat(val?.toString().replace(/[$, ]/g, '')) || 0; }
-        function fCurrency(num) { return '$' + Math.round(num).toLocaleString('en-US'); }
-        function fDiff(num) {
-            const sign = num > 0 ? '+' : (num < 0 ? '-' : '');
-            return sign + '$' + Math.abs(Math.round(num)).toLocaleString('en-US');
-        }
+    th { 
+        position: sticky; 
+        top: 0; 
+        background: #ffffff; 
+        padding: 0.8vh 0.3vw; 
+        z-index: 10;
+        font-size: 1.1vh;
+        border-bottom: 2px solid #edf2f1;
+    }
 
-        Papa.parse(csvUrl, {
-            download: true, header: true, skipEmptyLines: true,
-            complete: function(res) {
-                const headers = Object.keys(res.data[0] || {});
-                const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
-                const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
-                const cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO'));
-                const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); 
-                const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
+    /* Reducimos el padding de las celdas para ganar espacio vertical */
+    td { 
+        padding: 0.6vh 0.3vw; 
+        border-bottom: 1px solid #edf2f1; 
+    }
 
-                let data = res.data.filter(row => (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim());
-
-                document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
-
-                const tbody = document.querySelector('#dataTable tbody');
-                let rowsHTML = '', tObj = 0, tVta = 0, tIdl = 0;
-
-                data.forEach(item => {
-                    const obj = cleanNumber(item[cObj]), vta = cleanNumber(item[cVta]), idl = cleanNumber(item[cIdl]);
-                    const dif = vta - idl;
-                    tObj += obj; tVta += vta; tIdl += idl;
-                    rowsHTML += `<tr><td>${item[rKey]}</td><td class="td-obj">${fCurrency(obj)}</td><td class="td-vta">${fCurrency(vta)}</td><td class="td-idl">${fCurrency(idl)}</td><td class="td-dif ${dif >= 0 ? 'pos' : 'neg'}">${fDiff(dif)}</td></tr>`;
-                });
-
-                const tDif = tVta - tIdl;
-                const avanceGlobal = tObj > 0 ? (tVta / tObj) * 100 : 0;
-                
-                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fCurrency(tObj)}</td><td>${fCurrency(tVta)}</td><td>${fCurrency(tIdl)}</td><td class="${tDif >= 0 ? 'pos' : 'neg'}">${fDiff(tDif)}</td></tr>`;
-                tbody.innerHTML = rowsHTML;
-
-                // Actualizar Texto KPI
-                document.getElementById('percent-val').innerText = Math.round(avanceGlobal) + '%';
-
-                // Gráfica de Dona KPI
-                new Chart(document.getElementById('kpiChart'), {
-                    type: 'doughnut',
-                    data: {
-                        datasets: [{
-                            data: [avanceGlobal, Math.max(0, 100 - avanceGlobal)],
-                            backgroundColor: ['#2ecc71', '#edf2f1'],
-                            borderWidth: 0,
-                            borderRadius: 10
-                        }]
-                    },
-                    options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-                });
-
-                // Gráfica Principal
-                new Chart(document.getElementById('bulletChart'), {
-                    data: {
-                        labels: data.map(item => item[rKey]),
-                        datasets: [
-                            { type: 'bar', label: 'Objetivo', data: data.map(item => cleanNumber(item[cObj])), backgroundColor: 'rgba(231, 76, 60, 0.1)', borderColor: '#e74c3c', borderWidth: 1, borderRadius: 5, barPercentage: 0.85, order: 3 },
-                            { type: 'bar', label: 'Venta', data: data.map(item => cleanNumber(item[cVta])), backgroundColor: '#2ecc71', borderRadius: 5, barPercentage: 0.5, order: 2 },
-                            { type: 'line', label: 'Ideal', data: data.map(item => cleanNumber(item[cIdl])), backgroundColor: '#34495e', borderColor: '#34495e', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 18, pointBorderWidth: 5, order: 1 }
-                        ]
-                    },
-                    options: {
-                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, grouped: false,
-                        plugins: { legend: { position: 'bottom', labels: { color: '#7f8c8d', font: { size: 14 } } } },
-                        scales: {
-                            x: { grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { callback: v => '$' + v.toLocaleString() } },
-                            y: { grid: { display: false }, ticks: { font: { weight: '700', size: 14 } } }
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+    .tr-total td { 
+        position: sticky; 
+        bottom: 0; 
+        background: #f8f9fa; 
+        font-size: 1.5vh;
+        border-top: 2px solid #2c3e50;
+    }
+</style>
