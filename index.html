@@ -2,111 +2,219 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="300">
-    <title>Bullet Graph Gusi Pro</title>
+    <meta http-equiv="refresh" content="300"> <title>Bullet Graph Gusi Pro - Final</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
+        /* Reset total para ocupar toda la pantalla sin bordes */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100vh; width: 100vw; background: #000; overflow: hidden; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; }
-        #wrapper { width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; background: #080808; display: flex; flex-direction: column; }
-        h1 { text-align: center; padding: 1.5vh; font-size: 3vh; border-bottom: 1px solid #333; text-transform: uppercase; }
-        .chart-box { flex: 1; position: relative; padding: 10px 40px 10px 10px; }
-        #bulletChart { width: 100% !important; height: 100% !important; }
+        html, body {
+            height: 100vh; width: 100vw;
+            background-color: #000; /* Fondo negro absoluto */
+            overflow: hidden;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Contenedor principal forzado a formato 16:9 */
+        #page-wrapper {
+            width: 100vw;
+            height: 56.25vw; /* Ratio 16:9 basado en el ancho */
+            max-height: 100vh;
+            max-width: 177.78vh; /* Ratio 16:9 basado en el alto */
+            background-color: #080808; /* Fondo muy oscuro para el gráfico */
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            border-radius: 10px; /* Bordes suaves */
+            box-shadow: 0 0 30px rgba(0,255,118,0.15); /* Brillo sutil */
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            padding: 1.5vh 0; /* Padding relativo a la altura de pantalla */
+            font-size: 3.5vh; /* Fuente relativa a la altura de pantalla */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 2px solid #222;
+        }
+
+        #cedis-label { color: #00e676; font-weight: bold; }
+
+        .chart-container {
+            flex: 1; /* Ocupa todo el espacio vertical restante */
+            width: 100%;
+            position: relative;
+            /* Padding para que los textos y números no se corten */
+            padding: 10px 40px 10px 15px;
+        }
+
+        /*Canvas estirado por CSS */
+        #bulletChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #status {
+            color: #ff5252; font-size: 2.5vh; text-align: center;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div id="wrapper">
-        <h1>Avance Quincenal - <span id="cedis-label" style="color:#00e676">...</span></h1>
-        <div class="chart-box">
+    <div id="page-wrapper">
+        <h1>AVANCE QUINCENAL - <span id="cedis-label">CARGANDO...</span></h1>
+        <div id="status">Conectando con Google Sheets...</div>
+        <div class="chart-container">
             <canvas id="bulletChart"></canvas>
         </div>
     </div>
 
     <script>
+        // --- CONFIGURACIÓN ---
+        // Tu link de Google Sheets ya está aquí integrado
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRd-mUGTkbL5f931RSST3DmkXazVg7SjfMNGuhJEi7WtSAo9kf1w681N85BETt3Y3RpaId5RJBbjD-J/pub?gid=1020212716&single=true&output=csv';
+        // ---------------------
+
+        // Obtener el CEDIS de la URL (ej: .../index.html?cedis=AR)
         const urlParams = new URLSearchParams(window.location.search);
-        const cedis = urlParams.get('cedis');
+        const filtradoCedis = urlParams.get('cedis');
 
-        function num(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
+        // Función para limpiar símbolos de moneda y comas
+        function cleanNumber(val) {
+            if (!val) return 0;
+            return parseFloat(val.toString().replace(/[$, ]/g, '')) || 0;
+        }
 
+        // Leer el archivo CSV
         Papa.parse(csvUrl, {
-            download: true, header: true, skipEmptyLines: true,
-            complete: function(res) {
-                let data = res.data.filter(r => {
-                    const cKey = Object.keys(r).find(k => k.trim().toUpperCase() === 'CEDIS');
-                    return cedis ? r[cKey]?.trim().toUpperCase() === cedis.toUpperCase() : true;
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                let rawData = results.data;
+                document.getElementById('status').innerText = "Procesando datos...";
+
+                // Filtrar datos: Primero por CEDIS, luego eliminar filas sin Ruta
+                let data = rawData.filter(row => {
+                    const keys = Object.keys(row);
+                    const cediKey = keys.find(k => k.trim().toUpperCase() === 'CEDIS');
+                    const rutaKey = keys.find(k => k.trim().toUpperCase() === 'RUTA');
+                    
+                    const matchCedis = filtradoCedis ? row[cediKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true;
+                    const hasRuta = row[rutaKey] && row[rutaKey].trim() !== '';
+
+                    return matchCedis && hasRuta;
                 });
 
-                document.getElementById('cedis-label').innerText = cedis?.toUpperCase() || "TODOS";
+                // Actualizar el título con el CEDIS actual
+                document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "TODOS";
 
-                const labels = data.map(d => d[Object.keys(d).find(k => k.trim().toUpperCase() === 'RUTA')]);
-                const vta = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA')]));
-                const obj = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA')]));
-                const idl = data.map(d => num(d[Object.keys(d).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL')]));
+                if (data.length === 0) {
+                    document.getElementById('status').innerText = "ERROR: Sin datos para CEDIS " + filtradoCedis;
+                    return;
+                }
 
+                // Ocultar el mensaje de estado
+                document.getElementById('status').style.display = 'none';
+
+                // Identificar los nombres exactos de las columnas de datos
+                const colRuta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'RUTA');
+                const colObj = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'OBJETIVO_QUINCENA');
+                const colVta = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'VENTA_ALCANZADA');
+                const colIdeal = Object.keys(data[0]).find(k => k.trim().toUpperCase() === 'ALCANCE_IDEAL');
+
+                // --- CONFIGURACIÓN DE LA GRÁFICA ---
                 new Chart(document.getElementById('bulletChart'), {
-                    type: 'bar',
+                    type: 'bar', // Tipo base es barra
                     data: {
-                        labels: labels,
+                        labels: data.map(item => item[colRuta]), // Nombres de las rutas en el eje Y
                         datasets: [
+                            // Capa SUPERIOR: Ideal (Marcador flotante)
                             {
-                                label: 'Ideal',
-                                data: idl,
-                                type: 'scatter',
-                                backgroundColor: '#fff',
-                                pointStyle: 'line', // Línea vertical
-                                rotation: 90,
-                                pointRadius: 15,
-                                borderWidth: 3,
+                                type: 'scatter', // Tipo scatter para usar marcador
+                                label: 'Ideal a la fecha',
+                                data: data.map(item => cleanNumber(item[colIdeal])),
+                                backgroundColor: '#fff', // Punto blanco
                                 borderColor: '#fff',
-                                order: 0
+                                pointStyle: 'rectRot', // Rombo
+                                pointRadius: 10, // Tamaño
+                                order: 0 // Se dibuja hasta arriba
                             },
+                            // Capa MEDIA: Venta Actual (La barra verde de avance)
                             {
                                 label: 'Venta Actual',
-                                data: vta,
-                                backgroundColor: '#00e676',
-                                barPercentage: 0.4, // Delgada
-                                categoryPercentage: 1,
-                                order: 1
+                                data: data.map(item => cleanNumber(item[colVta])),
+                                backgroundColor: '#00e676', // Verde brillante
+                                barPercentage: 0.45, // Barra muy delgada para que quepa dentro
+                                categoryPercentage: 0.8,
+                                order: 1 // Encima del objetivo
                             },
+                            // Capa de FONDO: Objetivo Total (La barra "contenedor" más ancha)
                             {
                                 label: 'Objetivo Total',
-                                data: obj,
-                                backgroundColor: 'rgba(255, 82, 82, 0.1)',
-                                borderColor: '#ff5252',
-                                borderWidth: 1,
-                                barPercentage: 0.8, // Gruesa (contenedor)
-                                categoryPercentage: 1,
-                                order: 2
+                                data: data.map(item => cleanNumber(item[colObj])),
+                                backgroundColor: 'rgba(255, 82, 82, 0.1)', // Fondo rojo sutil
+                                borderColor: '#ff5252', // Borde rojo brillante
+                                borderWidth: 2,
+                                barPercentage: 0.9, // Barra casi al ancho total de la categoría
+                                categoryPercentage: 0.8,
+                                order: 2 // Va al fondo
                             }
                         ]
                     },
                     options: {
-                        indexAxis: 'y',
+                        indexAxis: 'y', // Gráfica horizontal
                         responsive: true,
-                        maintainAspectRatio: false,
-                        // ESTA ES LA CLAVE PARA QUE SE ENCIMEN
+                        maintainAspectRatio: false, // Ocupa todo el contenedor 16:9
+                        
+                        // --- LA CLAVE PARA SUPERPONER (BULLET REAL) ---
+                        // Desactivamos el agrupamiento automático de barras
                         datasets: {
                             bar: {
                                 grouping: false 
                             }
                         },
-                        scales: {
-                            x: { 
-                                stacked: false, 
-                                beginAtZero: true, 
-                                grid: { color: '#222' },
-                                ticks: { color: '#888', callback: v => '$' + v.toLocaleString() }
+                        // ------------------------------------------------
+                        
+                        plugins: {
+                            legend: {
+                                position: 'bottom', // Leyenda abajo para ganar ancho
+                                labels: { color: '#fff', font: { size: 16 }, boxWidth: 20, padding: 20 }
                             },
-                            y: { 
-                                stacked: false,
-                                ticks: { color: '#fff', font: { weight: 'bold', size: 14 } }
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: $${ctx.parsed.x.toLocaleString()}`
+                                }
                             }
                         },
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#fff' } }
-                        }
+                        scales: {
+                            x: {
+                                // Eje de Montos ($)
+                                stacked: false, // Importante: False para encimar las capas manualmente con 'order'
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.08)' }, // Líneas tenues
+                                ticks: {
+                                    color: '#aaa',
+                                    font: { size: 12 },
+                                    callback: (v) => '$' + v.toLocaleString() // Formato moneda
+                                }
+                            },
+                            y: {
+                                // Eje de Rutas (Nombres)
+                                grid: { display: false }, // Sin líneas horizontales
+                                ticks: {
+                                    color: '#fff',
+                                    font: { size: 16, weight: 'bold' },
+                                    padding: 10
+                                }
+                            }
+                        },
+                        // Padding final para asegurar que nada se corte
+                        layout: { padding: { right: 25, top: 10 } }
                     }
                 });
             }
