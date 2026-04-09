@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard IC - Optimized</title>
+    <title>Dashboard Gusi Premium - Bullet KPI</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -30,42 +30,37 @@
         /* Panel Derecho */
         .right-panel { flex: 0.40; display: flex; flex-direction: column; gap: 1vh; overflow: hidden; }
         
-        /* TABLA: Ahora con más espacio vertical */
         .table-box { 
-            flex: 0.80; /* Subimos de 0.70 a 0.80 */
+            flex: 0.78; 
             overflow: hidden; background: #ffffff; border-radius: 15px; padding: 10px; 
             box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff; 
         }
         
-        /* KPI CIRCULAR: Más pequeño para no estorbar */
         .kpi-box { 
-            flex: 0.20; /* Bajamos de 0.30 a 0.20 */
-            display: flex; align-items: center; justify-content: center; gap: 2vw;
-            background: #ffffff; border-radius: 15px; padding: 5px;
+            flex: 0.22; display: flex; align-items: center; justify-content: space-around;
+            background: #ffffff; border-radius: 15px; padding: 10px;
             box-shadow: inset 5px 5px 10px #f0f0f0, inset -5px -5px 10px #ffffff;
         }
-        .kpi-text { text-align: left; }
-        .kpi-value { font-size: 3.5vh; font-weight: 900; color: #2c3e50; line-height: 1; }
-        .kpi-label { font-size: 1.2vh; color: #7f8c8d; text-transform: uppercase; font-weight: 700; }
+        
+        .kpi-text { text-align: left; min-width: 45%; }
+        .kpi-value { font-size: 4vh; font-weight: 900; color: #2ecc71; line-height: 1; }
+        .kpi-target { font-size: 1.8vh; font-weight: 700; color: #34495e; margin-top: 5px; }
+        .kpi-label { font-size: 1.1vh; color: #7f8c8d; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
 
-        /* TABLA REDUCIDA PARA QUE QUEPAN LAS 15 RUTAS */
         table { width: 100%; border-collapse: collapse; font-size: 1.35vh; text-align: right; table-layout: fixed; }
         th { position: sticky; top: 0; background: #ffffff; padding: 0.5vh 0.2vw; color: #7f8c8d; font-weight: 700; text-transform: uppercase; font-size: 1.1vh; border-bottom: 2px solid #edf2f1; z-index: 10; }
         td { padding: 0.5vh 0.2vw; border-bottom: 1px solid #edf2f1; color: #34495e; }
         td:first-child { text-align: left; font-weight: 700; color: #2c3e50; width: 22%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .tr-total td { background: #f8f9fa; font-weight: 900 !important; font-size: 1.4vh; color: #2c3e50 !important; border-top: 2px solid #2c3e50; }
         
-        .td-obj { color: #e74c3c; }
-        .td-vta { color: #2ecc71; font-weight: 700; }
-        .td-idl { color: #7f8c8d; }
-        .pos { color: #27ae60; } .neg { color: #c0392b; }
+        .pos { color: #27ae60; font-weight: 900; } .neg { color: #c0392b; font-weight: 900; }
         
         .footer { text-align: center; padding: 1vh 0 0.5vh 0; font-size: 1.4vh; color: #bdc3c7; border-top: 1px solid #f0f0f0; }
     </style>
 </head>
 <body>
     <div id="wrapper">
-        <h1>AVANCE OBJETIVO QUINCENAL - CEDIS <span id="cedis-label">...</span></h1>
+        <h1>AVANCE OBJETIVO QUINCENAL - <span id="cedis-label">...</span></h1>
         <div id="main-content">
             <div class="left-panel">
                 <div class="chart-box"><canvas id="bulletChart"></canvas></div>
@@ -80,17 +75,18 @@
                     </table>
                 </div>
                 <div class="kpi-box">
-                    <div style="height: 100%; width: 30%; position: relative;">
-                        <canvas id="kpiChart"></canvas>
-                    </div>
                     <div class="kpi-text">
+                        <div class="kpi-label">Logro Actual</div>
                         <div class="kpi-value" id="percent-val">0%</div>
-                        <div class="kpi-label">Avance Total CEDIS</div>
+                        <div class="kpi-target" id="target-val">Ideal: 0%</div>
+                    </div>
+                    <div style="height: 100%; width: 35%; position: relative;">
+                        <canvas id="kpiChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial for Arbolito</div>
+        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
     </div>
 
     <script>
@@ -126,27 +122,40 @@
                     const obj = cleanNumber(item[cObj]), vta = cleanNumber(item[cVta]), idl = cleanNumber(item[cIdl]);
                     const dif = vta - idl;
                     tObj += obj; tVta += vta; tIdl += idl;
-                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fCurrency(obj)}</td><td class="td-vta">${fCurrency(vta)}</td><td>${fCurrency(idl)}</td><td class="${dif >= 0 ? 'pos' : 'neg'}">${fDiff(dif)}</td></tr>`;
+                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fCurrency(obj)}</td><td style="font-weight:700;color:#2ecc71">${fCurrency(vta)}</td><td>${fCurrency(idl)}</td><td class="${dif >= 0 ? 'pos' : 'neg'}">${fDiff(dif)}</td></tr>`;
                 });
 
                 const tDif = tVta - tIdl;
-                const avanceGlobal = tObj > 0 ? (tVta / tObj) * 100 : 0;
+                const percLogro = tObj > 0 ? (tVta / tObj) * 100 : 0;
+                const percIdeal = tObj > 0 ? (tIdl / tObj) * 100 : 0;
+                
                 rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fCurrency(tObj)}</td><td>${fCurrency(tVta)}</td><td>${fCurrency(tIdl)}</td><td class="${tDif >= 0 ? 'pos' : 'neg'}">${fDiff(tDif)}</td></tr>`;
                 tbody.innerHTML = rowsHTML;
 
-                document.getElementById('percent-val').innerText = Math.round(avanceGlobal) + '%';
+                // Actualizar Textos KPI
+                document.getElementById('percent-val').innerText = Math.round(percLogro) + '%';
+                document.getElementById('target-val').innerText = 'Ideal: ' + Math.round(percIdeal) + '%';
+                if(percLogro < percIdeal) document.getElementById('percent-val').style.color = '#e74c3c';
 
-                // KPI Circular Mini
+                // KPI Bullet Circular (3 Segmentos)
                 new Chart(document.getElementById('kpiChart'), {
                     type: 'doughnut',
                     data: {
                         datasets: [{
-                            data: [avanceGlobal, Math.max(0, 100 - avanceGlobal)],
-                            backgroundColor: ['#2ecc71', '#edf2f1'],
+                            data: [
+                                Math.min(percLogro, percIdeal), // Tramo común o logrado
+                                Math.max(0, percIdeal - percLogro), // Lo que falta para el ideal
+                                Math.max(0, 100 - Math.max(percLogro, percIdeal)) // Lo que falta para el 100%
+                            ],
+                            backgroundColor: [
+                                '#2ecc71', // Logrado (Verde)
+                                '#34495e', // Tramo pendiente al ideal (Gris Oscuro)
+                                '#edf2f1'  // Restante quincena (Gris Claro)
+                            ],
                             borderWidth: 0,
                         }]
                     },
-                    options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+                    options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
                 });
 
                 // Gráfica Principal
