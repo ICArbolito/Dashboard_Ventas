@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Gusi - Sales Pace (Lun-Sab)</title>
+    <title>Dashboard Arbolito - Centered Minimalist</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -30,53 +30,60 @@
         #wrapper { 
             width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
             background: var(--card); display: flex; flex-direction: column; 
-            padding: 3vh; position: relative; border-radius: 16px;
+            /* AQUÍ ESTÁ EL AJUSTE: Más margen a los lados para centrar el contenido */
+            padding: 4vh 5vw; 
+            position: relative; border-radius: 16px;
         }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2vh; padding-bottom: 1.5vh; border-bottom: 1px solid var(--border); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5vh; padding-bottom: 1.5vh; border-bottom: 1px solid var(--border); }
         h1 { font-size: 2.4vh; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
         #cedis-label { color: var(--green); }
 
-        #main-content { display: flex; flex: 1; gap: 1.5vw; overflow: hidden; }
+        #main-content { 
+            display: flex; flex: 1; 
+            /* AJUSTE: Espacio entre gráfica y tabla aumentado */
+            gap: 4vw; 
+            overflow: hidden; 
+        }
 
         .panel { display: flex; flex-direction: column; overflow: hidden; }
-        .left-panel { flex: 0.55; }
-        .right-panel { flex: 0.45; gap: 1.5vh; }
+        .left-panel { flex: 0.52; } /* Un poco más balanceado */
+        .right-panel { flex: 0.48; gap: 2vh; }
 
         .chart-container { flex: 1; position: relative; }
 
         .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 1.22vh; table-layout: fixed; }
-        th { position: sticky; top: 0; background: var(--card); text-align: right; padding: 0.8vh 0.3vw; color: var(--text-sub); font-weight: 600; text-transform: uppercase; font-size: 0.95vh; border-bottom: 1px solid var(--border); z-index: 10; }
-        th:first-child { text-align: left; width: 20%; }
+        table { width: 100%; border-collapse: collapse; font-size: 1.2vh; table-layout: fixed; }
+        th { position: sticky; top: 0; background: var(--card); text-align: right; padding: 0.8vh 0.3vw; color: var(--text-sub); font-weight: 600; text-transform: uppercase; font-size: 0.9vh; border-bottom: 1px solid var(--border); z-index: 10; }
+        th:first-child { text-align: left; width: 22%; }
         
         td { padding: 0.6vh 0.3vw; text-align: right; border-bottom: 1px solid rgba(241, 242, 246, 0.5); color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         td:first-child { text-align: left; font-weight: 700; color: var(--dark); }
 
-        .diff-badge { display: inline-block; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 1vh; min-width: 50px; text-align: center;}
+        .diff-badge { display: inline-block; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 0.9vh; min-width: 45px; text-align: center;}
         .pos { background: rgba(0, 184, 148, 0.1); color: var(--green); }
         .neg { background: rgba(255, 118, 117, 0.1); color: var(--red); }
         
         .td-sug { font-weight: 800; color: var(--blue); background: rgba(9, 132, 227, 0.03); }
 
         .tr-total { background: #fafafa; position: sticky; bottom: 0; z-index: 5; }
-        .tr-total td { font-weight: 800; border-top: 1.5px solid var(--dark); font-size: 1.3vh; color: var(--dark) !important; }
+        .tr-total td { font-weight: 800; border-top: 1.5px solid var(--dark); font-size: 1.25vh; }
 
         .kpi-box { 
-            height: 12vh; display: flex; align-items: center; justify-content: space-around;
-            border: 1px solid var(--border); border-radius: 12px; padding: 1vh; background: #fbfcfc;
+            height: 13vh; display: flex; align-items: center; justify-content: center; gap: 3vw;
+            border: 1px solid var(--border); border-radius: 12px; padding: 1.5vh; background: #fbfcfc;
         }
-        .kpi-val { font-size: 3.5vh; font-weight: 800; line-height: 1; color: var(--dark); }
-        .kpi-target { font-size: 1.2vh; color: var(--text-sub); font-weight: 400; }
+        .kpi-val { font-size: 3.8vh; font-weight: 800; line-height: 1; color: var(--dark); }
+        .kpi-target { font-size: 1.3vh; color: var(--text-sub); }
         
-        .footer { font-size: 1.1vh; color: #b2bec3; text-align: center; margin-top: 1.5vh; padding-top: 1vh; border-top: 1px solid var(--border); }
+        .footer { font-size: 1.1vh; color: #b2bec3; text-align: center; margin-top: 2vh; padding-top: 1vh; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <header>
             <h1>Monitoreo Quincenal <span id="cedis-label"></span></h1>
-            <div id="days-left" style="font-size: 1.3vh; font-weight: 700; color: var(--blue); background: rgba(9, 132, 227, 0.1); padding: 4px 12px; border-radius: 20px;"></div>
+            <div id="days-left" style="font-size: 1.3vh; font-weight: 700; color: var(--blue); background: rgba(9, 132, 227, 0.1); padding: 5px 15px; border-radius: 20px;"></div>
         </header>
 
         <div id="main-content">
@@ -93,23 +100,23 @@
                                 <th>Venta</th>
                                 <th>Ideal</th>
                                 <th>Dif.</th>
-                                <th style="color:var(--blue)">Cuota Diaria (L-S)</th>
+                                <th style="color:var(--blue)">Cuota L-S</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div>
                 <div class="kpi-box">
-                    <div style="height: 100%; width: 80px;"><canvas id="kpiChart"></canvas></div>
-                    <div class="kpi-info">
-                        <span style="font-size: 0.9vh; text-transform: uppercase; font-weight: 800; color: var(--text-sub);">Logro Quincenal</span>
+                    <div style="height: 100%; width: 90px;"><canvas id="kpiChart"></canvas></div>
+                    <div class="kpi-info" style="display:flex; flex-direction:column;">
+                        <span style="font-size: 0.9vh; text-transform: uppercase; font-weight: 800; color: var(--text-sub);">Logro Global</span>
                         <div class="kpi-val" id="percent-val">0%</div>
-                        <div class="kpi-target" id="target-val">Ideal hoy: 0%</div>
+                        <div class="kpi-target" id="target-val">Ideal: 0%</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial · Basado en días laborables (Lunes a Sábado)</div>
+        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
     </div>
 
     <script>
@@ -117,24 +124,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
-        // NUEVA LÓGICA: Días laborables restantes (Excluyendo Domingos)
         function getWorkingDaysRemaining() {
             const now = new Date();
             const dayOfMonth = now.getDate();
-            let lastDay;
-
-            if (dayOfMonth <= 15) {
-                lastDay = 15;
-            } else {
-                lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            }
-
+            let lastDay = (dayOfMonth <= 15) ? 15 : new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             let workingDays = 0;
             for (let i = dayOfMonth; i <= lastDay; i++) {
-                const checkDate = new Date(now.getFullYear(), now.getMonth(), i);
-                if (checkDate.getDay() !== 0) { // 0 es Domingo
-                    workingDays++;
-                }
+                if (new Date(now.getFullYear(), now.getMonth(), i).getDay() !== 0) workingDays++;
             }
             return Math.max(1, workingDays); 
         }
@@ -164,39 +160,21 @@
 
                 data.forEach(item => {
                     const o = clean(item[cObj]), v = clean(item[cVta]), i = clean(item[cIdl]), d = v - i;
-                    // Cuota sugerida usando días hábiles
                     const sug = Math.max(0, (o - v) / workingDaysLeft);
-                    
                     tObj += o; tVta += v; tIdl += i;
-                    rowsHTML += `<tr>
-                        <td>${item[rKey]}</td>
-                        <td>${fmt(o)}</td>
-                        <td style="color:var(--green);font-weight:700;">${fmt(v)}</td>
-                        <td>${fmt(i)}</td>
-                        <td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td>
-                        <td class="td-sug">${fmt(sug)}</td>
-                    </tr>`;
+                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--green);font-weight:700;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td class="td-sug">${fmt(sug)}</td></tr>`;
                 });
 
                 const tDif = tVta - tIdl;
-                const tSug = Math.max(0, (tObj - tVta) / workingDaysLeft);
                 const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0;
                 const pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
 
-                rowsHTML += `<tr class="tr-total">
-                    <td>TOTAL</td>
-                    <td>${fmt(tObj)}</td>
-                    <td>${fmt(tVta)}</td>
-                    <td>${fmt(tIdl)}</td>
-                    <td><span class="diff-badge ${tDif>=0?'pos':'neg'}">${fmtD(tDif)}</span></td>
-                    <td style="color:var(--blue)">${fmt(tSug)}</td>
-                </tr>`;
-                
+                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge ${tDif>=0?'pos':'neg'}">${fmtD(tDif)}</span></td><td style="color:var(--blue)">${fmt(Math.max(0, (tObj - tVta) / workingDaysLeft))}</td></tr>`;
                 tbody.innerHTML = rowsHTML;
-                document.getElementById('percent-val').innerText = Math.round(pLogro) + '%';
-                document.getElementById('target-val').innerText = 'Ideal hoy: ' + Math.round(pIdeal) + '%';
 
-                // --- CHARTS ---
+                document.getElementById('percent-val').innerText = Math.round(pLogro) + '%';
+                document.getElementById('target-val').innerText = 'Meta hoy: ' + Math.round(pIdeal) + '%';
+
                 new Chart(document.getElementById('kpiChart'), {
                     type: 'doughnut',
                     data: {
@@ -215,7 +193,7 @@
                         datasets: [
                             { type: 'bar', label: 'Meta', data: data.map(item => clean(item[cObj])), backgroundColor: '#f1f2f6', barPercentage: 0.85, categoryPercentage: 1.0, order: 3 },
                             { type: 'bar', label: 'Avance', data: data.map(item => clean(item[cVta])), backgroundColor: '#00b894', barPercentage: 0.5, categoryPercentage: 1.0, order: 2 },
-                            { type: 'line', label: 'Ideal', data: data.map(item => clean(item[cIdl])), backgroundColor: '#34495e', borderColor: '#34495e', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 15, pointBorderWidth: 4, order: 1 }
+                            { type: 'line', label: 'Ideal', data: data.map(item => clean(item[cIdl])), backgroundColor: '#2d3436', borderColor: '#2d3436', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 15, pointBorderWidth: 4, order: 1 }
                         ]
                     },
                     options: {
