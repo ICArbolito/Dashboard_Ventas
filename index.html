@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Gusi Intelligence - Black Ops Edition</title>
+    <title>Gusi Intelligence - Black Ops Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
-            --bg: #0a0c10;
-            --panel: #11141b;
-            --text-main: #ffffff;
-            --text-sub: #64748b;
-            --neon-green: #00ff9d;
-            --neon-blue: #00d2ff;
-            --neon-red: #ff4757;
-            --border: rgba(255, 255, 255, 0.05);
+            --bg: #05070a;
+            --panel: #0d1117;
+            --text: #ffffff;
+            --sub: #8b949e;
+            --neon: #00ff9d;
+            --electric: #00d2ff;
+            --danger: #ff4757;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             height: 100vh; width: 100vw; background: var(--bg); 
-            color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; 
             display: flex; align-items: center; justify-content: center;
         }
 
@@ -34,51 +34,50 @@
 
         header { 
             display: flex; justify-content: space-between; align-items: flex-end; 
-            margin-bottom: 4vh; border-left: 4px solid var(--neon-green); padding-left: 20px;
+            margin-bottom: 4vh; border-left: 5px solid var(--neon); padding-left: 25px;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 157, 0.2));
         }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 3vh; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-        #cedis-label { color: var(--neon-green); text-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
-        .days-badge { font-family: 'Orbitron', sans-serif; font-size: 1.4vh; color: var(--neon-blue); background: rgba(0, 210, 255, 0.1); padding: 8px 20px; border-radius: 4px; border: 1px solid var(--neon-blue); }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3.2vh; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; }
+        #cedis-label { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
 
         #main-content { display: flex; flex: 1; gap: 4vw; overflow: hidden; }
 
-        .panel { background: var(--panel); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .left-panel { flex: 0.55; padding: 20px; }
-        .right-panel { flex: 0.45; display: flex; flex-direction: column; gap: 2vh; background: transparent; border: none; box-shadow: none; }
+        .panel { background: var(--panel); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
+        .left-panel { flex: 0.55; padding: 25px; }
+        .right-panel { flex: 0.45; display: flex; flex-direction: column; gap: 2.5vh; background: transparent; border: none; box-shadow: none; }
         
-        .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; background: var(--panel); border-radius: 12px; border: 1px solid var(--border); padding: 15px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 1.25vh; }
-        th { text-align: right; padding: 0 10px 8px 10px; color: var(--text-sub); font-size: 1vh; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
+        .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; background: var(--panel); border-radius: 16px; border: 1px solid var(--border); padding: 15px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 1.3vh; }
+        th { text-align: right; padding: 0 12px 10px 12px; color: var(--sub); font-size: 1.1vh; text-transform: uppercase; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
         th:first-child { text-align: left; }
         
-        td { padding: 1vh 10px; background: rgba(255,255,255,0.02); }
-        td:first-child { border-radius: 6px 0 0 6px; font-weight: 800; text-align: left; color: var(--neon-blue); }
-        td:last-child { border-radius: 0 6px 6px 0; font-weight: 800; color: var(--neon-blue); }
+        td { padding: 1.2vh 12px; background: rgba(255,255,255,0.03); transition: all 0.3s; }
+        td:first-child { border-radius: 8px 0 0 8px; font-weight: 800; text-align: left; color: var(--electric); }
+        td:last-child { border-radius: 0 8px 8px 0; font-weight: 900; color: var(--electric); text-shadow: 0 0 5px rgba(0, 210, 255, 0.3); }
 
-        .diff-badge { padding: 3px 8px; border-radius: 4px; font-weight: 800; font-size: 1.1vh; min-width: 65px; text-align: center; display: inline-block; }
-        .pos { background: rgba(0, 255, 157, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
-        .neg { background: rgba(255, 71, 87, 0.1); color: var(--neon-red); border: 1px solid var(--neon-red); }
+        .diff-badge { padding: 4px 10px; border-radius: 6px; font-weight: 900; font-size: 1.1vh; min-width: 70px; text-align: center; display: inline-block; }
+        .pos { background: rgba(0, 255, 157, 0.15); color: var(--neon); border: 1px solid var(--neon); box-shadow: 0 0 10px rgba(0, 255, 157, 0.1); }
+        .neg { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid var(--danger); }
 
-        .tr-total td { background: var(--neon-green) !important; color: #000 !important; font-weight: 900 !important; font-size: 1.5vh; }
+        .tr-total td { background: var(--neon) !important; color: #000 !important; font-weight: 900 !important; font-size: 1.6vh; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
 
         .kpi-box { 
-            height: 15vh; display: flex; align-items: center; justify-content: space-around;
-            background: var(--panel); border-radius: 12px; border: 1px solid var(--border); padding: 20px;
+            height: 16vh; display: flex; align-items: center; justify-content: space-around;
+            background: linear-gradient(145deg, #0d1117, #05070a); border-radius: 16px; border: 1px solid var(--border); padding: 20px;
         }
-        .kpi-val { font-family: 'Orbitron', sans-serif; font-size: 5vh; font-weight: 900; color: var(--neon-green); text-shadow: 0 0 20px rgba(0, 255, 157, 0.3); line-height: 1; }
-        .kpi-label { font-size: 1vh; text-transform: uppercase; color: var(--text-sub); font-weight: 800; letter-spacing: 2px; }
+        .kpi-val { font-family: 'Orbitron', sans-serif; font-size: 5.5vh; font-weight: 900; color: var(--neon); text-shadow: 0 0 25px var(--neon); line-height: 1; }
         
-        .footer { font-size: 1.1vh; color: var(--text-sub); text-align: center; margin-top: 2vh; text-transform: uppercase; letter-spacing: 4px; opacity: 0.4; }
+        .footer { font-size: 1.2vh; color: var(--sub); text-align: center; margin-top: 2.5vh; text-transform: uppercase; letter-spacing: 5px; opacity: 0.5; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <header>
             <div>
-                <p style="font-size: 1vh; color: var(--text-sub); font-weight: 800; letter-spacing: 3px; margin-bottom: 5px;">COMMAND CENTER · LIVE DATA</p>
-                <h1>CENTRAL <span id="cedis-label"></span></h1>
+                <p style="font-size: 1.1vh; color: var(--sub); font-weight: 800; letter-spacing: 4px; margin-bottom: 8px;">INTELLIGENCE DEPLOYMENT · ACTIVE</p>
+                <h1>OPERACIONES <span id="cedis-label"></span></h1>
             </div>
-            <div id="days-info" class="days-badge"></div>
+            <div id="days-info" style="font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.5vh; color: var(--electric); background: rgba(0, 210, 255, 0.1); padding: 10px 25px; border-radius: 4px; border: 1px solid var(--electric);"></div>
         </header>
 
         <div id="main-content">
@@ -95,7 +94,7 @@
                                 <th>Venta</th>
                                 <th>Ideal</th>
                                 <th>Dif.</th>
-                                <th style="color:var(--neon-blue)">Cuota L-S</th>
+                                <th style="color:var(--electric)">Meta Diaria</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -103,15 +102,15 @@
                 </div>
                 <div class="kpi-box">
                     <div class="kpi-info">
-                        <div class="kpi-label">Logro Quincenal</div>
+                        <div style="font-size: 1.1vh; text-transform: uppercase; color: var(--sub); font-weight: 800; letter-spacing: 2px;">Logro Global</div>
                         <div class="kpi-val" id="percent-val">0%</div>
-                        <div class="kpi-target" id="target-val" style="font-size: 1.4vh; color: var(--neon-blue); font-weight: 700; margin-top: 5px;">Ideal: 0%</div>
+                        <div id="target-val" style="font-size: 1.5vh; color: var(--electric); font-weight: 800; margin-top: 8px;">Ideal: 0%</div>
                     </div>
-                    <div style="height: 100%; width: 100px;"><canvas id="kpiChart"></canvas></div>
+                    <div style="height: 110%; width: 120px;"><canvas id="kpiChart"></canvas></div>
                 </div>
             </div>
         </div>
-        <div class="footer">Arbolito Intelligence · Data Flow v3.0 · 2026</div>
+        <div class="footer">Arbolito HQ · 2026 · Cyber-Monitoring System</div>
     </div>
 
     <script>
@@ -131,7 +130,7 @@
         }
 
         const daysLeft = getWorkingDays();
-        document.getElementById('days-info').innerText = `${daysLeft} DÍAS HÁBILES RESTANTES`;
+        document.getElementById('days-info').innerText = `DÍAS RESTANTES: ${daysLeft}`;
 
         function clean(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
         function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
@@ -151,7 +150,7 @@
                 data.forEach(item => {
                     const o = clean(item[cObj]), v = clean(item[cVta]), i = clean(item[cIdl]), d = v - i;
                     tObj += o; tVta += v; tIdl += i;
-                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--neon-green);font-weight:900;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td>${fmt(Math.max(0,(o-v)/daysLeft))}</td></tr>`;
+                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--neon);font-weight:900;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td>${fmt(Math.max(0,(o-v)/daysLeft))}</td></tr>`;
                 });
 
                 const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0, pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
@@ -166,11 +165,11 @@
                     data: {
                         datasets: [{
                             data: [Math.min(pLogro, pIdeal), Math.max(0, pIdeal - pLogro), Math.max(0, 100 - Math.max(pLogro, pIdeal))],
-                            backgroundColor: [pLogro >= pIdeal ? '#00ff9d' : '#ff4757', '#00d2ff', 'rgba(255,255,255,0.05)'],
+                            backgroundColor: [pLogro >= pIdeal ? '#00ff9d' : '#ff4757', '#00d2ff', 'rgba(255,255,255,0.03)'],
                             borderWidth: 0,
                         }]
                     },
-                    options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { cutout: '85%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
 
                 new Chart(document.getElementById('bulletChart'), {
@@ -179,7 +178,7 @@
                         datasets: [
                             { type: 'bar', data: data.map(item => clean(item[cObj])), backgroundColor: 'rgba(255,255,255,0.05)', barPercentage: 0.85, borderRadius: 4, order: 3 },
                             { type: 'bar', data: data.map(item => clean(item[cVta])), backgroundColor: '#00ff9d', barPercentage: 0.5, borderRadius: 4, order: 2 },
-                            { type: 'line', data: data.map(item => clean(item[cIdl])), backgroundColor: '#fff', borderColor: '#fff', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 15, pointBorderWidth: 4, order: 1 }
+                            { type: 'line', data: data.map(item => clean(item[cIdl])), backgroundColor: '#fff', borderColor: '#fff', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 16, pointBorderWidth: 4, order: 1 }
                         ]
                     },
                     options: {
@@ -187,7 +186,7 @@
                         plugins: { legend: { display: false } },
                         scales: {
                             x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 }, callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
-                            y: { grid: { display: false }, ticks: { color: '#fff', font: { weight: 700, size: 13 } } }
+                            y: { grid: { display: false }, ticks: { color: '#fff', font: { weight: 800, size: 14 } } }
                         }
                     }
                 });
