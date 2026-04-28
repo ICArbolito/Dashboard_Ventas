@@ -3,87 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Dashboard Arbolito - Centered Minimalist</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Gusi Intelligence - Executive Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
-            --bg: #fbfcfc;
+            --bg: #f0f2f5;
             --card: #ffffff;
-            --text-main: #2d3436;
-            --text-sub: #7f8c8d;
-            --green: #00b894;
-            --red: #ff7675;
-            --dark: #2d3436;
-            --border: #edf2f1;
-            --blue: #0984e3;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --border: #e2e8f0;
+            --accent: #f8fafc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             height: 100vh; width: 100vw; background: var(--bg); 
             overflow: hidden; color: var(--text-main); 
-            font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center;
+            font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center;
         }
 
         #wrapper { 
             width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
             background: var(--card); display: flex; flex-direction: column; 
-            /* AQUÍ ESTÁ EL AJUSTE: Más margen a los lados para centrar el contenido */
-            padding: 4vh 5vw; 
-            position: relative; border-radius: 16px;
+            padding: 4vh 6vw; border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5vh; padding-bottom: 1.5vh; border-bottom: 1px solid var(--border); }
-        h1 { font-size: 2.4vh; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
-        #cedis-label { color: var(--green); }
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3vh; border-bottom: 2px solid var(--accent); padding-bottom: 1.5vh; }
+        .title-group h1 { font-size: 3vh; font-weight: 800; letter-spacing: -1px; color: var(--text-main); }
+        .title-group span { color: var(--green); }
+        
+        .badge-days { font-size: 1.4vh; font-weight: 700; color: var(--blue); background: #eff6ff; padding: 6px 16px; border-radius: 12px; border: 1px solid #dbeafe; }
 
-        #main-content { 
-            display: flex; flex: 1; 
-            /* AJUSTE: Espacio entre gráfica y tabla aumentado */
-            gap: 4vw; 
-            overflow: hidden; 
-        }
+        #main-content { display: flex; flex: 1; gap: 5vw; overflow: hidden; }
 
-        .panel { display: flex; flex-direction: column; overflow: hidden; }
-        .left-panel { flex: 0.52; } /* Un poco más balanceado */
-        .right-panel { flex: 0.48; gap: 2vh; }
+        .panel { display: flex; flex-direction: column; }
+        .left-panel { flex: 0.5; }
+        .right-panel { flex: 0.5; gap: 2.5vh; }
 
-        .chart-container { flex: 1; position: relative; }
+        .chart-container { flex: 1; position: relative; background: var(--accent); border-radius: 16px; padding: 1.5vh; }
 
         .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; }
-        table { width: 100%; border-collapse: collapse; font-size: 1.2vh; table-layout: fixed; }
-        th { position: sticky; top: 0; background: var(--card); text-align: right; padding: 0.8vh 0.3vw; color: var(--text-sub); font-weight: 600; text-transform: uppercase; font-size: 0.9vh; border-bottom: 1px solid var(--border); z-index: 10; }
-        th:first-child { text-align: left; width: 22%; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 1.25vh; }
+        th { text-align: right; padding: 1vh 0.5vw; color: var(--text-sub); font-weight: 600; text-transform: uppercase; font-size: 1vh; letter-spacing: 0.5px; }
+        th:first-child { text-align: left; }
         
-        td { padding: 0.6vh 0.3vw; text-align: right; border-bottom: 1px solid rgba(241, 242, 246, 0.5); color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        td:first-child { text-align: left; font-weight: 700; color: var(--dark); }
+        td { padding: 0.8vh 0.5vw; text-align: right; background: var(--accent); color: var(--text-main); }
+        td:first-child { text-align: left; font-weight: 700; border-radius: 8px 0 0 8px; }
+        td:last-child { border-radius: 0 8px 8px 0; }
 
-        .diff-badge { display: inline-block; padding: 2px 4px; border-radius: 4px; font-weight: 800; font-size: 0.9vh; min-width: 45px; text-align: center;}
-        .pos { background: rgba(0, 184, 148, 0.1); color: var(--green); }
-        .neg { background: rgba(255, 118, 117, 0.1); color: var(--red); }
+        .diff-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 1.1vh; }
+        .pos { background: #d1fae5; color: #065f46; }
+        .neg { background: #fee2e2; color: #991b1b; }
         
-        .td-sug { font-weight: 800; color: var(--blue); background: rgba(9, 132, 227, 0.03); }
+        .td-sug { font-weight: 800; color: var(--blue); }
 
-        .tr-total { background: #fafafa; position: sticky; bottom: 0; z-index: 5; }
-        .tr-total td { font-weight: 800; border-top: 1.5px solid var(--dark); font-size: 1.25vh; }
+        .tr-total td { background: var(--text-main) !important; color: #ffffff !important; padding: 1.2vh 0.5vw; border-top: none; }
+        .tr-total .diff-badge { background: rgba(255,255,255,0.2); color: #ffffff; }
 
         .kpi-box { 
-            height: 13vh; display: flex; align-items: center; justify-content: center; gap: 3vw;
-            border: 1px solid var(--border); border-radius: 12px; padding: 1.5vh; background: #fbfcfc;
+            height: 14vh; display: flex; align-items: center; justify-content: center; gap: 3vw;
+            background: var(--accent); border-radius: 20px; padding: 2vh;
         }
-        .kpi-val { font-size: 3.8vh; font-weight: 800; line-height: 1; color: var(--dark); }
-        .kpi-target { font-size: 1.3vh; color: var(--text-sub); }
+        .kpi-val { font-size: 4.5vh; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+        .kpi-target { font-size: 1.4vh; color: var(--text-sub); font-weight: 500; }
         
-        .footer { font-size: 1.1vh; color: #b2bec3; text-align: center; margin-top: 2vh; padding-top: 1vh; border-top: 1px solid var(--border); }
+        .footer { font-size: 1.2vh; color: #94a3b8; text-align: center; margin-top: 2.5vh; font-weight: 500; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <header>
-            <h1>Monitoreo Quincenal <span id="cedis-label"></span></h1>
-            <div id="days-left" style="font-size: 1.3vh; font-weight: 700; color: var(--blue); background: rgba(9, 132, 227, 0.1); padding: 5px 15px; border-radius: 20px;"></div>
+            <div class="title-group">
+                <p style="font-size: 1.1vh; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px;">Intelligence Report</p>
+                <h1>Avance Quincenal <span id="cedis-label"></span></h1>
+            </div>
+            <div id="days-left" class="badge-days"></div>
         </header>
 
         <div id="main-content">
@@ -107,16 +107,16 @@
                     </table>
                 </div>
                 <div class="kpi-box">
-                    <div style="height: 100%; width: 90px;"><canvas id="kpiChart"></canvas></div>
+                    <div style="height: 100%; width: 100px;"><canvas id="kpiChart"></canvas></div>
                     <div class="kpi-info" style="display:flex; flex-direction:column;">
-                        <span style="font-size: 0.9vh; text-transform: uppercase; font-weight: 800; color: var(--text-sub);">Logro Global</span>
+                        <span style="font-size: 1vh; text-transform: uppercase; font-weight: 800; color: var(--text-sub); letter-spacing: 1px;">Logro Consolidado</span>
                         <div class="kpi-val" id="percent-val">0%</div>
                         <div class="kpi-target" id="target-val">Ideal: 0%</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="footer">Source: SistemaCP | Made by Inteligencia Comercial</div>
+        <div class="footer">ARBOLITO © 2026 · SISTEMACP DATA FLOW</div>
     </div>
 
     <script>
@@ -136,7 +136,7 @@
         }
 
         const workingDaysLeft = getWorkingDaysRemaining();
-        document.getElementById('days-left').innerText = `${workingDaysLeft} Días hábiles restantes`;
+        document.getElementById('days-left').innerText = `${workingDaysLeft} DÍAS HÁBILES PARA EL CIERRE`;
 
         function clean(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
         function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
@@ -153,7 +153,7 @@
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
                 let data = res.data.filter(row => (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim());
-                document.getElementById('cedis-label').innerText = '· ' + (filtradoCedis?.toUpperCase() || "GLOBAL");
+                document.getElementById('cedis-label').innerText = '· ' + (filtradoCedis?.toUpperCase() || "BAJÍO");
 
                 const tbody = document.querySelector('#dataTable tbody');
                 let tObj = 0, tVta = 0, tIdl = 0, rowsHTML = '';
@@ -169,39 +169,40 @@
                 const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0;
                 const pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
 
-                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge ${tDif>=0?'pos':'neg'}">${fmtD(tDif)}</span></td><td style="color:var(--blue)">${fmt(Math.max(0, (tObj - tVta) / workingDaysLeft))}</td></tr>`;
+                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge">${fmtD(tDif)}</span></td><td>${fmt(Math.max(0, (tObj - tVta) / workingDaysLeft))}</td></tr>`;
                 tbody.innerHTML = rowsHTML;
 
                 document.getElementById('percent-val').innerText = Math.round(pLogro) + '%';
-                document.getElementById('target-val').innerText = 'Meta hoy: ' + Math.round(pIdeal) + '%';
+                document.getElementById('target-val').innerText = 'Tendencia Ideal: ' + Math.round(pIdeal) + '%';
+                if(pLogro < pIdeal) document.getElementById('percent-val').style.color = 'var(--red)';
 
                 new Chart(document.getElementById('kpiChart'), {
                     type: 'doughnut',
                     data: {
                         datasets: [{
                             data: [Math.min(pLogro, pIdeal), Math.max(0, pIdeal - pLogro), Math.max(0, 100 - Math.max(pLogro, pIdeal))],
-                            backgroundColor: [pLogro >= pIdeal ? '#00b894' : '#ff7675', '#34495e', '#f1f2f6'],
+                            backgroundColor: [pLogro >= pIdeal ? '#10b981' : '#f87171', '#1e293b', '#e2e8f0'],
                             borderWidth: 0,
                         }]
                     },
-                    options: { cutout: '85%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { cutout: '82%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
 
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
                         datasets: [
-                            { type: 'bar', label: 'Meta', data: data.map(item => clean(item[cObj])), backgroundColor: '#f1f2f6', barPercentage: 0.85, categoryPercentage: 1.0, order: 3 },
-                            { type: 'bar', label: 'Avance', data: data.map(item => clean(item[cVta])), backgroundColor: '#00b894', barPercentage: 0.5, categoryPercentage: 1.0, order: 2 },
-                            { type: 'line', label: 'Ideal', data: data.map(item => clean(item[cIdl])), backgroundColor: '#2d3436', borderColor: '#2d3436', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 15, pointBorderWidth: 4, order: 1 }
+                            { type: 'bar', label: 'Meta', data: data.map(item => clean(item[cObj])), backgroundColor: '#f1f5f9', barPercentage: 0.8, borderRadius: 4, order: 3 },
+                            { type: 'bar', label: 'Avance', data: data.map(item => clean(item[cVta])), backgroundColor: '#10b981', barPercentage: 0.45, borderRadius: 4, order: 2 },
+                            { type: 'line', label: 'Ideal', data: data.map(item => clean(item[cIdl])), backgroundColor: '#1e293b', borderColor: '#1e293b', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 12, pointBorderWidth: 3, order: 1 }
                         ]
                     },
                     options: {
                         indexAxis: 'y', responsive: true, maintainAspectRatio: false, grouped: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            x: { grid: { display: false }, ticks: { font: { size: 9 }, callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
-                            y: { grid: { display: false }, ticks: { font: { weight: 600, size: 12 } } }
+                            x: { grid: { display: false }, ticks: { font: { size: 9, weight: 600 }, color: '#94a3b8', callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
+                            y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 700, size: 12 }, color: '#1e293b' } }
                         }
                     }
                 });
