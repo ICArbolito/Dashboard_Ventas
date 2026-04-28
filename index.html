@@ -3,87 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Gusi Intelligence - Executive Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Gusi Intelligence - Modern UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
-            --bg: #f0f2f5;
+            --bg: #f8fafc;
             --card: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-sub: #64748b;
             --green: #10b981;
-            --red: #ef4444;
+            --red: #f43f5e;
             --blue: #3b82f6;
-            --border: #e2e8f0;
-            --accent: #f8fafc;
+            --accent: #f1f5f9;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             height: 100vh; width: 100vw; background: var(--bg); 
-            overflow: hidden; color: var(--text-main); 
-            font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center;
+            color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; 
+            display: flex; align-items: center; justify-content: center;
         }
 
         #wrapper { 
             width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
             background: var(--card); display: flex; flex-direction: column; 
-            padding: 4vh 6vw; border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            padding: 3vh 5vw; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);
         }
 
-        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3vh; border-bottom: 2px solid var(--accent); padding-bottom: 1.5vh; }
-        .title-group h1 { font-size: 3vh; font-weight: 800; letter-spacing: -1px; color: var(--text-main); }
-        .title-group span { color: var(--green); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2vh; }
+        h1 { font-size: 3vh; font-weight: 800; letter-spacing: -1px; }
+        #cedis-label { color: var(--green); }
+
+        #main-content { display: flex; flex: 1; gap: 4vw; overflow: hidden; }
+
+        /* Panel Izquierdo: Gráfica de Bala */
+        .left-panel { flex: 0.55; display: flex; flex-direction: column; }
+        .chart-container { flex: 1; background: var(--accent); border-radius: 16px; padding: 1.5vh; }
+
+        /* Panel Derecho: Tabla y KPI */
+        .right-panel { flex: 0.45; display: flex; flex-direction: column; gap: 2vh; }
         
-        .badge-days { font-size: 1.4vh; font-weight: 700; color: var(--blue); background: #eff6ff; padding: 6px 16px; border-radius: 12px; border: 1px solid #dbeafe; }
-
-        #main-content { display: flex; flex: 1; gap: 5vw; overflow: hidden; }
-
-        .panel { display: flex; flex-direction: column; }
-        .left-panel { flex: 0.5; }
-        .right-panel { flex: 0.5; gap: 2.5vh; }
-
-        .chart-container { flex: 1; position: relative; background: var(--accent); border-radius: 16px; padding: 1.5vh; }
-
         .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 1.25vh; }
-        th { text-align: right; padding: 1vh 0.5vw; color: var(--text-sub); font-weight: 600; text-transform: uppercase; font-size: 1vh; letter-spacing: 0.5px; }
+        .table-box::-webkit-scrollbar { display: none; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 1.25vh; }
+        th { text-align: right; padding: 0 10px 5px 10px; color: var(--text-sub); font-size: 1vh; text-transform: uppercase; font-weight: 700; }
         th:first-child { text-align: left; }
         
-        td { padding: 0.8vh 0.5vw; text-align: right; background: var(--accent); color: var(--text-main); }
-        td:first-child { text-align: left; font-weight: 700; border-radius: 8px 0 0 8px; }
-        td:last-child { border-radius: 0 8px 8px 0; }
+        /* Efecto de Tarjetas en la Tabla */
+        td { padding: 1vh 10px; background: var(--accent); border: none; }
+        td:first-child { border-radius: 10px 0 0 10px; font-weight: 700; text-align: left; }
+        td:last-child { border-radius: 0 10px 10px 0; }
 
-        .diff-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 1.1vh; }
-        .pos { background: #d1fae5; color: #065f46; }
+        /* Badge de Diferencia con estilo Neumórfico */
+        .diff-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 1.1vh; display: inline-block; min-width: 65px; text-align: center;}
+        .pos { background: #dcfce7; color: #166534; }
         .neg { background: #fee2e2; color: #991b1b; }
-        
-        .td-sug { font-weight: 800; color: var(--blue); }
 
-        .tr-total td { background: var(--text-main) !important; color: #ffffff !important; padding: 1.2vh 0.5vw; border-top: none; }
-        .tr-total .diff-badge { background: rgba(255,255,255,0.2); color: #ffffff; }
+        .tr-total td { background: var(--text-main) !important; color: white !important; font-size: 1.4vh; padding: 1.2vh 10px; }
 
+        /* KPI Box con diseño de Dashboard Moderno */
         .kpi-box { 
-            height: 14vh; display: flex; align-items: center; justify-content: center; gap: 3vw;
-            background: var(--accent); border-radius: 20px; padding: 2vh;
+            height: 14vh; display: flex; align-items: center; justify-content: center; gap: 2vw;
+            background: var(--text-main); color: white; border-radius: 16px; padding: 2vh;
         }
-        .kpi-val { font-size: 4.5vh; font-weight: 800; line-height: 1; letter-spacing: -2px; }
-        .kpi-target { font-size: 1.4vh; color: var(--text-sub); font-weight: 500; }
+        .kpi-val { font-size: 5vh; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+        .kpi-target { font-size: 1.4vh; opacity: 0.7; }
         
-        .footer { font-size: 1.2vh; color: #94a3b8; text-align: center; margin-top: 2.5vh; font-weight: 500; }
+        .footer { font-size: 1.2vh; color: var(--text-sub); text-align: center; margin-top: 2vh; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <header>
-            <div class="title-group">
-                <p style="font-size: 1.1vh; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px;">Intelligence Report</p>
-                <h1>Avance Quincenal <span id="cedis-label"></span></h1>
-            </div>
-            <div id="days-left" class="badge-days"></div>
+            <h1>Rendimiento <span id="cedis-label"></span></h1>
+            <div id="days-info" style="font-weight: 700; font-size: 1.4vh; color: var(--blue);"></div>
         </header>
 
         <div id="main-content">
@@ -109,9 +105,9 @@
                 <div class="kpi-box">
                     <div style="height: 100%; width: 100px;"><canvas id="kpiChart"></canvas></div>
                     <div class="kpi-info" style="display:flex; flex-direction:column;">
-                        <span style="font-size: 1vh; text-transform: uppercase; font-weight: 800; color: var(--text-sub); letter-spacing: 1px;">Logro Consolidado</span>
+                        <span style="font-size: 1vh; text-transform: uppercase; opacity: 0.6; font-weight: 700;">Avance Global</span>
                         <div class="kpi-val" id="percent-val">0%</div>
-                        <div class="kpi-target" id="target-val">Ideal: 0%</div>
+                        <div class="kpi-target" id="target-val">Meta: 0%</div>
                     </div>
                 </div>
             </div>
@@ -124,23 +120,23 @@
         const urlParams = new URLSearchParams(window.location.search);
         const filtradoCedis = urlParams.get('cedis');
 
-        function getWorkingDaysRemaining() {
+        function getWorkingDays() {
             const now = new Date();
-            const dayOfMonth = now.getDate();
-            let lastDay = (dayOfMonth <= 15) ? 15 : new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            let workingDays = 0;
-            for (let i = dayOfMonth; i <= lastDay; i++) {
-                if (new Date(now.getFullYear(), now.getMonth(), i).getDay() !== 0) workingDays++;
+            const day = now.getDate();
+            const last = (day <= 15) ? 15 : new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            let count = 0;
+            for (let i = day; i <= last; i++) {
+                if (new Date(now.getFullYear(), now.getMonth(), i).getDay() !== 0) count++;
             }
-            return Math.max(1, workingDays); 
+            return Math.max(1, count); 
         }
 
-        const workingDaysLeft = getWorkingDaysRemaining();
-        document.getElementById('days-left').innerText = `${workingDaysLeft} DÍAS HÁBILES PARA EL CIERRE`;
+        const daysLeft = getWorkingDays();
+        document.getElementById('days-info').innerText = `CIERRE EN ${daysLeft} DÍAS HÁBILES`;
 
         function clean(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
-        function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
-        function fmtD(n) { return (n >= 0 ? '+' : '-') + '$' + Math.abs(Math.round(n)).toLocaleString('en-US'); }
+        function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+        function fmtD(n) { return (n >= 0 ? '+' : '-') + '$' + Math.abs(Math.round(n)).toLocaleString(); }
 
         Papa.parse(csvUrl, {
             download: true, header: true, skipEmptyLines: true,
@@ -153,56 +149,53 @@
                 const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
 
                 let data = res.data.filter(row => (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim());
-                document.getElementById('cedis-label').innerText = '· ' + (filtradoCedis?.toUpperCase() || "BAJÍO");
+                document.getElementById('cedis-label').innerText = '· ' + (filtradoCedis?.toUpperCase() || "GLOBAL");
 
                 const tbody = document.querySelector('#dataTable tbody');
                 let tObj = 0, tVta = 0, tIdl = 0, rowsHTML = '';
 
                 data.forEach(item => {
                     const o = clean(item[cObj]), v = clean(item[cVta]), i = clean(item[cIdl]), d = v - i;
-                    const sug = Math.max(0, (o - v) / workingDaysLeft);
                     tObj += o; tVta += v; tIdl += i;
-                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--green);font-weight:700;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td class="td-sug">${fmt(sug)}</td></tr>`;
+                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--green);font-weight:800;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td style="font-weight:700;color:var(--blue)">${fmt(Math.max(0,(o-v)/daysLeft))}</td></tr>`;
                 });
 
-                const tDif = tVta - tIdl;
                 const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0;
                 const pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
 
-                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge">${fmtD(tDif)}</span></td><td>${fmt(Math.max(0, (tObj - tVta) / workingDaysLeft))}</td></tr>`;
+                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge" style="background:rgba(255,255,255,0.2);color:white">${fmtD(tVta-tIdl)}</span></td><td>${fmt(Math.max(0,(tObj-tVta)/daysLeft))}</td></tr>`;
                 tbody.innerHTML = rowsHTML;
 
                 document.getElementById('percent-val').innerText = Math.round(pLogro) + '%';
-                document.getElementById('target-val').innerText = 'Tendencia Ideal: ' + Math.round(pIdeal) + '%';
-                if(pLogro < pIdeal) document.getElementById('percent-val').style.color = 'var(--red)';
+                document.getElementById('target-val').innerText = 'Ideal hoy: ' + Math.round(pIdeal) + '%';
 
                 new Chart(document.getElementById('kpiChart'), {
                     type: 'doughnut',
                     data: {
                         datasets: [{
                             data: [Math.min(pLogro, pIdeal), Math.max(0, pIdeal - pLogro), Math.max(0, 100 - Math.max(pLogro, pIdeal))],
-                            backgroundColor: [pLogro >= pIdeal ? '#10b981' : '#f87171', '#1e293b', '#e2e8f0'],
+                            backgroundColor: [pLogro >= pIdeal ? '#10b981' : '#f43f5e', '#ffffff', 'rgba(255,255,255,0.1)'],
                             borderWidth: 0,
                         }]
                     },
-                    options: { cutout: '82%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
 
                 new Chart(document.getElementById('bulletChart'), {
                     data: {
                         labels: data.map(item => item[rKey]),
                         datasets: [
-                            { type: 'bar', label: 'Meta', data: data.map(item => clean(item[cObj])), backgroundColor: '#f1f5f9', barPercentage: 0.8, borderRadius: 4, order: 3 },
-                            { type: 'bar', label: 'Avance', data: data.map(item => clean(item[cVta])), backgroundColor: '#10b981', barPercentage: 0.45, borderRadius: 4, order: 2 },
-                            { type: 'line', label: 'Ideal', data: data.map(item => clean(item[cIdl])), backgroundColor: '#1e293b', borderColor: '#1e293b', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 12, pointBorderWidth: 3, order: 1 }
+                            { type: 'bar', data: data.map(item => clean(item[cObj])), backgroundColor: 'rgba(0,0,0,0.05)', barPercentage: 0.8, borderRadius: 6, order: 3 },
+                            { type: 'bar', data: data.map(item => clean(item[cVta])), backgroundColor: '#10b981', barPercentage: 0.4, borderRadius: 6, order: 2 },
+                            { type: 'line', data: data.map(item => clean(item[cIdl])), backgroundColor: '#0f172a', borderColor: '#0f172a', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 12, pointBorderWidth: 4, order: 1 }
                         ]
                     },
                     options: {
                         indexAxis: 'y', responsive: true, maintainAspectRatio: false, grouped: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            x: { grid: { display: false }, ticks: { font: { size: 9, weight: 600 }, color: '#94a3b8', callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
-                            y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 700, size: 12 }, color: '#1e293b' } }
+                            x: { grid: { display: false }, ticks: { font: { size: 10 }, callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
+                            y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 700, size: 13 } } }
                         }
                     }
                 });
