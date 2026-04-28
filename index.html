@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="300">
-    <title>Gusi Intelligence - Modern UI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Gusi Intelligence - Black Ops Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --green: #10b981;
-            --red: #f43f5e;
-            --blue: #3b82f6;
-            --accent: #f1f5f9;
+            --bg: #0b0e14;
+            --card: #151921;
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
+            --green: #00ff9d; /* Neón Green */
+            --red: #ff4757;
+            --blue: #00d2ff;
+            --border: #2d343e;
+            --glow: rgba(0, 255, 157, 0.2);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,58 +29,70 @@
 
         #wrapper { 
             width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; 
-            background: var(--card); display: flex; flex-direction: column; 
-            padding: 3vh 5vw; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            background: var(--bg); display: flex; flex-direction: column; 
+            padding: 3vh 4vw; position: relative;
         }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2vh; }
-        h1 { font-size: 3vh; font-weight: 800; letter-spacing: -1px; }
-        #cedis-label { color: var(--green); }
+        /* Header con toque futurista */
+        header { 
+            display: flex; justify-content: space-between; align-items: flex-end; 
+            margin-bottom: 3vh; border-left: 5px solid var(--green); padding-left: 20px;
+        }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3vh; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        #cedis-label { color: var(--green); text-shadow: 0 0 15px var(--glow); }
 
-        #main-content { display: flex; flex: 1; gap: 4vw; overflow: hidden; }
+        #main-content { display: flex; flex: 1; gap: 3vw; overflow: hidden; }
 
-        /* Panel Izquierdo: Gráfica de Bala */
-        .left-panel { flex: 0.55; display: flex; flex-direction: column; }
-        .chart-container { flex: 1; background: var(--accent); border-radius: 16px; padding: 1.5vh; }
-
-        /* Panel Derecho: Tabla y KPI */
-        .right-panel { flex: 0.45; display: flex; flex-direction: column; gap: 2vh; }
+        /* Paneles con efecto de cristal oscuro */
+        .panel { background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .left-panel { flex: 0.55; padding: 2vh; }
+        .right-panel { flex: 0.45; display: flex; flex-direction: column; gap: 2vh; background: transparent; border: none; box-shadow: none; }
         
-        .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; }
+        .chart-container { flex: 1; position: relative; }
+
+        .table-box { flex: 1; overflow-y: auto; scrollbar-width: none; background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 10px; }
         .table-box::-webkit-scrollbar { display: none; }
         
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 1.25vh; }
-        th { text-align: right; padding: 0 10px 5px 10px; color: var(--text-sub); font-size: 1vh; text-transform: uppercase; font-weight: 700; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 6px; font-size: 1.2vh; }
+        th { text-align: right; padding: 0 10px 5px 10px; color: var(--text-sub); font-size: 1vh; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
         th:first-child { text-align: left; }
         
-        /* Efecto de Tarjetas en la Tabla */
-        td { padding: 1vh 10px; background: var(--accent); border: none; }
-        td:first-child { border-radius: 10px 0 0 10px; font-weight: 700; text-align: left; }
-        td:last-child { border-radius: 0 10px 10px 0; }
+        td { padding: 1.1vh 10px; background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.05); }
+        td:first-child { border-radius: 8px 0 0 8px; font-weight: 800; text-align: left; color: var(--blue); }
+        td:last-child { border-radius: 0 8px 8px 0; }
 
-        /* Badge de Diferencia con estilo Neumórfico */
-        .diff-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 1.1vh; display: inline-block; min-width: 65px; text-align: center;}
-        .pos { background: #dcfce7; color: #166534; }
-        .neg { background: #fee2e2; color: #991b1b; }
+        /* Badges Neón */
+        .diff-badge { padding: 3px 8px; border-radius: 4px; font-weight: 800; font-size: 1vh; display: inline-block; min-width: 60px; text-align: center;}
+        .pos { background: rgba(0, 255, 157, 0.1); color: var(--green); border: 1px solid var(--green); }
+        .neg { background: rgba(255, 71, 87, 0.1); color: var(--red); border: 1px solid var(--red); }
 
-        .tr-total td { background: var(--text-main) !important; color: white !important; font-size: 1.4vh; padding: 1.2vh 10px; }
+        .tr-total td { background: var(--green) !important; color: #000 !important; font-weight: 900 !important; font-size: 1.4vh; border: none; }
+        .tr-total td:first-child { color: #000 !important; }
 
-        /* KPI Box con diseño de Dashboard Moderno */
+        /* KPI Box Impacto Total */
         .kpi-box { 
-            height: 14vh; display: flex; align-items: center; justify-content: center; gap: 2vw;
-            background: var(--text-main); color: white; border-radius: 16px; padding: 2vh;
+            height: 15vh; display: flex; align-items: center; justify-content: space-around;
+            background: linear-gradient(135deg, #151921 0%, #0b0e14 100%);
+            border-radius: 16px; border: 1px solid var(--border); padding: 2vh;
+            position: relative; overflow: hidden;
         }
-        .kpi-val { font-size: 5vh; font-weight: 800; line-height: 1; letter-spacing: -2px; }
-        .kpi-target { font-size: 1.4vh; opacity: 0.7; }
+        .kpi-box::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,210,255,0.05) 0%, transparent 70%); pointer-events: none; }
         
-        .footer { font-size: 1.2vh; color: var(--text-sub); text-align: center; margin-top: 2vh; }
+        .kpi-val { font-family: 'Orbitron', sans-serif; font-size: 5vh; font-weight: 900; color: var(--green); text-shadow: 0 0 20px var(--glow); line-height: 1; }
+        .kpi-label { font-size: 1vh; text-transform: uppercase; color: var(--text-sub); font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; }
+        .kpi-target { font-size: 1.4vh; color: var(--blue); font-weight: 600; margin-top: 5px; }
+        
+        .footer { font-size: 1.1vh; color: var(--text-sub); text-align: center; margin-top: 2vh; text-transform: uppercase; letter-spacing: 3px; opacity: 0.5; }
     </style>
 </head>
 <body>
     <div id="wrapper">
         <header>
-            <h1>Rendimiento <span id="cedis-label"></span></h1>
-            <div id="days-info" style="font-weight: 700; font-size: 1.4vh; color: var(--blue);"></div>
+            <div>
+                <p style="font-size: 1vh; color: var(--text-sub); font-weight: 800; letter-spacing: 3px; margin-bottom: 5px;">LIVE SYSTEM MONITOR</p>
+                <h1>CENTRAL <span id="cedis-label"></span></h1>
+            </div>
+            <div id="days-info" style="font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.4vh; color: var(--blue);"></div>
         </header>
 
         <div id="main-content">
@@ -103,16 +116,16 @@
                     </table>
                 </div>
                 <div class="kpi-box">
-                    <div style="height: 100%; width: 100px;"><canvas id="kpiChart"></canvas></div>
-                    <div class="kpi-info" style="display:flex; flex-direction:column;">
-                        <span style="font-size: 1vh; text-transform: uppercase; opacity: 0.6; font-weight: 700;">Avance Global</span>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Logro Quincenal</div>
                         <div class="kpi-val" id="percent-val">0%</div>
-                        <div class="kpi-target" id="target-val">Meta: 0%</div>
+                        <div class="kpi-target" id="target-val">Ideal: 0%</div>
                     </div>
+                    <div style="height: 100%; width: 120px;"><canvas id="kpiChart"></canvas></div>
                 </div>
             </div>
         </div>
-        <div class="footer">ARBOLITO © 2026 · SISTEMACP DATA FLOW</div>
+        <div class="footer">Arbolito Intelligence · Secure Data Stream · 2026</div>
     </div>
 
     <script>
@@ -132,7 +145,7 @@
         }
 
         const daysLeft = getWorkingDays();
-        document.getElementById('days-info').innerText = `CIERRE EN ${daysLeft} DÍAS HÁBILES`;
+        document.getElementById('days-info').innerText = `ETA: ${daysLeft} DAYS REMAINING`;
 
         function clean(v) { return parseFloat(v?.toString().replace(/[$, ]/g, '')) || 0; }
         function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
@@ -142,14 +155,9 @@
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
                 const headers = Object.keys(res.data[0]);
-                const cKey = headers.find(k => k.toUpperCase().includes('CEDIS'));
-                const rKey = headers.find(k => k.toUpperCase().includes('RUTA'));
-                const cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO'));
-                const cVta = headers.find(k => k.toUpperCase().includes('VENTA')); 
-                const cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
-
+                const cKey = headers.find(k => k.toUpperCase().includes('CEDIS')), rKey = headers.find(k => k.toUpperCase().includes('RUTA')), cObj = headers.find(k => k.toUpperCase().includes('OBJETIVO')), cVta = headers.find(k => k.toUpperCase().includes('VENTA')), cIdl = headers.find(k => k.toUpperCase().includes('IDEAL'));
                 let data = res.data.filter(row => (filtradoCedis ? row[cKey]?.trim().toUpperCase() === filtradoCedis.toUpperCase() : true) && row[rKey]?.trim());
-                document.getElementById('cedis-label').innerText = '· ' + (filtradoCedis?.toUpperCase() || "GLOBAL");
+                document.getElementById('cedis-label').innerText = filtradoCedis?.toUpperCase() || "BAJÍO";
 
                 const tbody = document.querySelector('#dataTable tbody');
                 let tObj = 0, tVta = 0, tIdl = 0, rowsHTML = '';
@@ -157,24 +165,22 @@
                 data.forEach(item => {
                     const o = clean(item[cObj]), v = clean(item[cVta]), i = clean(item[cIdl]), d = v - i;
                     tObj += o; tVta += v; tIdl += i;
-                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--green);font-weight:800;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td style="font-weight:700;color:var(--blue)">${fmt(Math.max(0,(o-v)/daysLeft))}</td></tr>`;
+                    rowsHTML += `<tr><td>${item[rKey]}</td><td>${fmt(o)}</td><td style="color:var(--green);font-weight:900;">${fmt(v)}</td><td>${fmt(i)}</td><td><span class="diff-badge ${d>=0?'pos':'neg'}">${fmtD(d)}</span></td><td style="font-weight:700;color:var(--blue)">${fmt(Math.max(0,(o-v)/daysLeft))}</td></tr>`;
                 });
 
-                const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0;
-                const pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
-
-                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge" style="background:rgba(255,255,255,0.2);color:white">${fmtD(tVta-tIdl)}</span></td><td>${fmt(Math.max(0,(tObj-tVta)/daysLeft))}</td></tr>`;
+                const pLogro = tObj > 0 ? (tVta/tObj)*100 : 0, pIdeal = tObj > 0 ? (tIdl/tObj)*100 : 0;
+                rowsHTML += `<tr class="tr-total"><td>TOTAL</td><td>${fmt(tObj)}</td><td>${fmt(tVta)}</td><td>${fmt(tIdl)}</td><td><span class="diff-badge" style="background:#000;color:#fff;border:none">${fmtD(tVta-tIdl)}</span></td><td>${fmt(Math.max(0,(tObj-tVta)/daysLeft))}</td></tr>`;
                 tbody.innerHTML = rowsHTML;
 
                 document.getElementById('percent-val').innerText = Math.round(pLogro) + '%';
-                document.getElementById('target-val').innerText = 'Ideal hoy: ' + Math.round(pIdeal) + '%';
+                document.getElementById('target-val').innerText = 'IDEAL HOY: ' + Math.round(pIdeal) + '%';
 
                 new Chart(document.getElementById('kpiChart'), {
                     type: 'doughnut',
                     data: {
                         datasets: [{
                             data: [Math.min(pLogro, pIdeal), Math.max(0, pIdeal - pLogro), Math.max(0, 100 - Math.max(pLogro, pIdeal))],
-                            backgroundColor: [pLogro >= pIdeal ? '#10b981' : '#f43f5e', '#ffffff', 'rgba(255,255,255,0.1)'],
+                            backgroundColor: [pLogro >= pIdeal ? '#00ff9d' : '#ff4757', '#00d2ff', 'rgba(255,255,255,0.05)'],
                             borderWidth: 0,
                         }]
                     },
@@ -185,17 +191,17 @@
                     data: {
                         labels: data.map(item => item[rKey]),
                         datasets: [
-                            { type: 'bar', data: data.map(item => clean(item[cObj])), backgroundColor: 'rgba(0,0,0,0.05)', barPercentage: 0.8, borderRadius: 6, order: 3 },
-                            { type: 'bar', data: data.map(item => clean(item[cVta])), backgroundColor: '#10b981', barPercentage: 0.4, borderRadius: 6, order: 2 },
-                            { type: 'line', data: data.map(item => clean(item[cIdl])), backgroundColor: '#0f172a', borderColor: '#0f172a', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 12, pointBorderWidth: 4, order: 1 }
+                            { type: 'bar', data: data.map(item => clean(item[cObj])), backgroundColor: 'rgba(255,255,255,0.05)', barPercentage: 0.8, borderRadius: 4, order: 3 },
+                            { type: 'bar', data: data.map(item => clean(item[cVta])), backgroundColor: '#00ff9d', barPercentage: 0.4, borderRadius: 4, order: 2, shadowBlur: 10, shadowColor: 'rgba(0, 255, 157, 0.5)' },
+                            { type: 'line', data: data.map(item => clean(item[cIdl])), backgroundColor: '#fff', borderColor: '#fff', showLine: false, pointStyle: 'line', rotation: 90, pointRadius: 15, pointBorderWidth: 4, order: 1 }
                         ]
                     },
                     options: {
                         indexAxis: 'y', responsive: true, maintainAspectRatio: false, grouped: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            x: { grid: { display: false }, ticks: { font: { size: 10 }, callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
-                            y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 700, size: 13 } } }
+                            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 }, callback: v => '$' + v.toLocaleString('en-US', { notation: 'compact' }) } },
+                            y: { grid: { display: false }, ticks: { color: '#fff', font: { weight: 700, size: 13 } } }
                         }
                     }
                 });
